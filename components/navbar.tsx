@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { 
@@ -16,16 +16,28 @@ import {
   Info,
   ChevronLeft,
   ChevronRight,
-  TrendingUp,
   MessageSquare,
-  Newspaper
+  Newspaper,
+  Rocket,
+  Building2
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useSidebar } from './sidebar-context';
+import { useAuth } from '@/lib/auth-context';
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { isCollapsed, toggleSidebar } = useSidebar();
+  const { user, logout } = useAuth();
+
+  const isInvestor = user?.role === 'investor';
+  const isStartup = user?.role === 'startup';
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/login');
+  };
 
   return (
     <div 
@@ -37,7 +49,7 @@ export function Navbar() {
       <div className="p-2">
         <div className="flex items-center justify-between mb-4">
           {!isCollapsed && (
-            <h1 className="text-xl font-bold text-singlife-primary">Singlife</h1>
+            <h1 className="text-xl font-bold text-singlife-primary">FinForge</h1>
           )}
           <Button
             variant="ghost"
@@ -50,13 +62,13 @@ export function Navbar() {
         </div>
         
         <nav className="space-y-1">
-          <Link href="/">
+          <Link href="/dashboard">
             <Button
               variant="ghost"
               size="sm"
               className={cn(
                 'w-full justify-start gap-2 h-9',
-                pathname === '/' && 'bg-singlife-light text-singlife-primary',
+                pathname === '/dashboard' && 'bg-singlife-light text-singlife-primary',
                 isCollapsed && 'justify-center'
               )}
             >
@@ -65,110 +77,88 @@ export function Navbar() {
             </Button>
           </Link>
 
-          <Link href="/chat">
-            <Button
-              variant="ghost"
-              size="sm"
-              className={cn(
-                'w-full justify-start gap-2 h-9',
-                pathname === '/chat' && 'bg-singlife-light text-singlife-primary',
-                isCollapsed && 'justify-center'
-              )}
-            >
-              <MessageSquare className="h-4 w-4" />
-              {!isCollapsed && "Chat"}
-            </Button>
-          </Link>
+          {isInvestor && (
+            <>
+              <Link href="/chat">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    'w-full justify-start gap-2 h-9',
+                    pathname === '/chat' && 'bg-singlife-light text-singlife-primary',
+                    isCollapsed && 'justify-center'
+                  )}
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  {!isCollapsed && "Chat"}
+                </Button>
+              </Link>
 
-          <Link href="/investments">
-            <Button
-              variant="ghost"
-              size="sm"
-              className={cn(
-                'w-full justify-start gap-2 h-9',
-                pathname === '/investments' && 'bg-singlife-light text-singlife-primary',
-                isCollapsed && 'justify-center'
-              )}
-            >
-              <TrendingUp className="h-4 w-4" />
-              {!isCollapsed && "Investments"}
-            </Button>
-          </Link>
+              <Link href="/investments">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    'w-full justify-start gap-2 h-9',
+                    pathname === '/investments' && 'bg-singlife-light text-singlife-primary',
+                    isCollapsed && 'justify-center'
+                  )}
+                >
+                  <BarChart2 className="h-4 w-4" />
+                  {!isCollapsed && "Investments"}
+                </Button>
+              </Link>
 
-          <Link href="/news">
-            <Button
-              variant="ghost"
-              size="sm"
-              className={cn(
-                'w-full justify-start gap-2 h-9',
-                pathname === '/news' && 'bg-singlife-light text-singlife-primary',
-                isCollapsed && 'justify-center'
-              )}
-            >
-              <Newspaper className="h-4 w-4" />
-              {!isCollapsed && "News"}
-            </Button>
-          </Link>
+              <Link href="/news">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    'w-full justify-start gap-2 h-9',
+                    pathname === '/news' && 'bg-singlife-light text-singlife-primary',
+                    isCollapsed && 'justify-center'
+                  )}
+                >
+                  <Newspaper className="h-4 w-4" />
+                  {!isCollapsed && "News"}
+                </Button>
+              </Link>
 
-          <Link href="/due-diligence">
-            <Button
-              variant="ghost"
-              size="sm"
-              className={cn(
-                'w-full justify-start gap-2 h-9',
-                pathname === '/due-diligence' && 'bg-singlife-light text-singlife-primary',
-                isCollapsed && 'justify-center'
-              )}
-            >
-              <FileText className="h-4 w-4" />
-              {!isCollapsed && "Due Diligence"}
-            </Button>
-          </Link>
+              <Link href="/due-diligence">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    'w-full justify-start gap-2 h-9',
+                    pathname === '/due-diligence' && 'bg-singlife-light text-singlife-primary',
+                    isCollapsed && 'justify-center'
+                  )}
+                >
+                  <FileText className="h-4 w-4" />
+                  {!isCollapsed && "Due Diligence"}
+                </Button>
+              </Link>
+            </>
+          )}
 
-          <Link href="/risk-assessment">
-            <Button
-              variant="ghost"
-              size="sm"
-              className={cn(
-                'w-full justify-start gap-2 h-9',
-                pathname === '/risk-assessment' && 'bg-singlife-light text-singlife-primary',
-                isCollapsed && 'justify-center'
-              )}
-            >
-              <BarChart2 className="h-4 w-4" />
-              {!isCollapsed && "Risk Assessment"}
-            </Button>
-          </Link>
-
-          <Link href="/compliance">
-            <Button
-              variant="ghost"
-              size="sm"
-              className={cn(
-                'w-full justify-start gap-2 h-9',
-                pathname === '/compliance' && 'bg-singlife-light text-singlife-primary',
-                isCollapsed && 'justify-center'
-              )}
-            >
-              <Shield className="h-4 w-4" />
-              {!isCollapsed && "Compliance"}
-            </Button>
-          </Link>
-
-          <Link href="/team">
-            <Button
-              variant="ghost"
-              size="sm"
-              className={cn(
-                'w-full justify-start gap-2 h-9',
-                pathname === '/team' && 'bg-singlife-light text-singlife-primary',
-                isCollapsed && 'justify-center'
-              )}
-            >
-              <Users className="h-4 w-4" />
-              {!isCollapsed && "Team"}
-            </Button>
-          </Link>
+          {isStartup && (
+            <>
+              <Link href="/startups/edit/profile">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    'w-full justify-start gap-2 h-9',
+                    pathname === '/startups/edit/profile' && 'bg-singlife-light text-singlife-primary',
+                    isCollapsed && 'justify-center'
+                  )}
+                >
+                  <Building2 className="h-4 w-4" />
+                  {!isCollapsed && "My Profile"}
+                </Button>
+              </Link>
+            </>
+          )}
 
           <Link href="/about">
             <Button
@@ -191,12 +181,12 @@ export function Navbar() {
         <div className={cn("flex items-center gap-2 mb-2", isCollapsed && "justify-center")}>
           <Avatar className="h-8 w-8">
             <AvatarImage src="/avatar-placeholder.png" />
-            <AvatarFallback>JD</AvatarFallback>
+            <AvatarFallback>{user?.name?.slice(0, 2) || 'U'}</AvatarFallback>
           </Avatar>
           {!isCollapsed && (
             <div>
-              <p className="font-medium text-sm text-singlife-secondary">John Doe</p>
-              <p className="text-xs text-gray-500">Admin</p>
+              <p className="font-medium text-sm text-singlife-secondary">{user?.name || 'User'}</p>
+              <p className="text-xs text-gray-500 capitalize">{user?.role || 'Guest'}</p>
             </div>
           )}
         </div>
@@ -218,6 +208,7 @@ export function Navbar() {
               "w-full justify-start gap-2 h-9 text-red-500 hover:text-red-600",
               isCollapsed && "justify-center"
             )}
+            onClick={handleLogout}
           >
             <LogOut className="h-4 w-4" />
             {!isCollapsed && "Logout"}

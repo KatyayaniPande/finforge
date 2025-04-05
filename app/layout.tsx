@@ -5,12 +5,10 @@ import { Inter } from "next/font/google";
 
 import '@/app/globals.css'
 import { cn } from '@/lib/utils'
-// import { ThemeToggle } from '@/components/theme-toggle'
 import { Providers } from '@/components/providers'
-import { Header } from '@/components/header'
 import { Toaster } from '@/components/ui/sonner'
-import { Navbar } from "@/components/navbar";
-import { SidebarProvider } from "@/components/sidebar-context";
+import { AuthProvider } from '@/lib/auth-context';
+import { ClientLayout } from '@/components/client-layout';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -38,11 +36,7 @@ export const viewport = {
   ]
 }
 
-interface RootLayoutProps {
-  children: React.ReactNode
-}
-
-export default function RootLayout({ children }: RootLayoutProps) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -60,21 +54,13 @@ export default function RootLayout({ children }: RootLayoutProps) {
           enableSystem
           disableTransitionOnChange
         >
-          <SidebarProvider>
-            <div className="flex min-h-screen">
-              <Navbar />
-              <div className="flex-1 transition-all duration-300 ml-16 lg:ml-56">
-                <main className="p-4 lg:p-6">
-                  <div className="max-w-7xl mx-auto">
-                    {children}
-                  </div>
-                </main>
-              </div>
-            </div>
-          </SidebarProvider>
-          {/* <ThemeToggle /> */}
+          <AuthProvider>
+            <ClientLayout>
+              {children}
+            </ClientLayout>
+          </AuthProvider>
         </Providers>
       </body>
     </html>
-  )
+  );
 }
