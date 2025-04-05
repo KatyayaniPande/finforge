@@ -174,5 +174,4 @@ export function MarketOverview({}) {
     </div>
   )
 }
-
 export default memo(MarketOverview)
