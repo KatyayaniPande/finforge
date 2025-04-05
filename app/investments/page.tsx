@@ -328,7 +328,7 @@ export default function InvestmentsPage() {
           Industry
         </h3>
         <div className="space-y-2">
-          {filterOptions.industry.map((option) => (
+          {filterCounts.industry.map((option) => (
             <Button 
               key={option.value} 
               variant={filters.industry === option.value ? "default" : "ghost"} 
@@ -336,19 +336,10 @@ export default function InvestmentsPage() {
                 filters.industry === option.value ? 'bg-singlife-primary text-white hover:text-white' : ''
               }`}
               onClick={() => {
-                const newFilters = {
+                setFilters({
                   ...filters,
                   industry: filters.industry === option.value ? null : option.value
-                };
-                console.log('Setting industry filter:', {
-                  oldValue: filters.industry,
-                  newValue: newFilters.industry,
-                  availableStartups: currentTabStartups.map(s => ({
-                    name: s.company_name,
-                    industry: s.industry
-                  }))
                 });
-                setFilters(newFilters);
               }}
             >
               {option.label}
@@ -366,7 +357,7 @@ export default function InvestmentsPage() {
           Funding Stage
         </h3>
         <div className="space-y-2">
-          {filterOptions.stage.map((option) => (
+          {filterCounts.stage.map((option) => (
             <Button 
               key={option.value} 
               variant={filters.stage === option.value ? "default" : "ghost"} 
@@ -374,19 +365,10 @@ export default function InvestmentsPage() {
                 filters.stage === option.value ? 'bg-singlife-primary text-white hover:text-white' : ''
               }`}
               onClick={() => {
-                const newFilters = {
+                setFilters({
                   ...filters,
                   stage: filters.stage === option.value ? null : option.value
-                };
-                console.log('Setting stage filter:', {
-                  oldValue: filters.stage,
-                  newValue: newFilters.stage,
-                  availableStartups: currentTabStartups.map(s => ({
-                    name: s.company_name,
-                    stage: s.stage
-                  }))
                 });
-                setFilters(newFilters);
               }}
             >
               {option.label}
