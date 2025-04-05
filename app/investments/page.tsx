@@ -41,43 +41,20 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Startup } from "@/lib/db/investments"
 
-interface FilterState {
-  industry: string | null
-  stage: string | null
-  location: string | null
-  teamSize: string | null
-  product_stage: string | null
+interface FilterOption {
+  value: string;
+  label: string;
+  count: number;
 }
 
-// Define available filter options
-const filterOptions = {
-  industry: [
-    { value: "AI & Machine Learning", label: "AI & Machine Learning", count: 12 },
-    { value: "CleanTech", label: "CleanTech", count: 8 },
-    { value: "Cybersecurity", label: "Cybersecurity", count: 15 },
-    { value: "FinTech", label: "FinTech", count: 20 },
-    { value: "HealthTech", label: "HealthTech", count: 18 },
-    { value: "BioTech", label: "BioTech", count: 10 }
-  ],
-  stage: [
-    { value: "Pre-Seed", label: "Pre-Seed", count: 15 },
-    { value: "Seed", label: "Seed", count: 25 },
-    { value: "Series A", label: "Series A", count: 18 },
-    { value: "Series B", label: "Series B", count: 12 },
-    { value: "Series C+", label: "Series C+", count: 5 }
-  ],
-  location: [
-    { value: "Singapore", label: "Singapore", count: 30 },
-    { value: "Southeast Asia", label: "Southeast Asia", count: 20 },
-    { value: "Global", label: "Global", count: 10 }
-  ],
-  teamSize: [
-    { value: "1-5", label: "1-5 people", count: 15 },
-    { value: "6-10", label: "6-10 people", count: 20 },
-    { value: "11-20", label: "11-20 people", count: 18 },
-    { value: "21-50", label: "21-50 people", count: 12 },
-    { value: "50+", label: "50+ people", count: 5 }
-  ]
+interface FilterCounts {
+  industry: FilterOption[];
+  stage: FilterOption[];
+}
+
+interface FilterState {
+  industry: string | null;
+  stage: string | null;
 }
 
 export default function InvestmentsPage() {
@@ -87,14 +64,15 @@ export default function InvestmentsPage() {
   const [sortBy, setSortBy] = useState<"default" | "valuation" | "growth" | "stage">("default")
   const [filters, setFilters] = useState<FilterState>({
     industry: null,
-    stage: null,
-    location: null,
-    teamSize: null,
-    product_stage: null
+    stage: null
   })
   const [featuredStartups, setFeaturedStartups] = useState<Startup[]>([])
   const [trendingStartups, setTrendingStartups] = useState<Startup[]>([])
   const [earlyStageStartups, setEarlyStageStartups] = useState<Startup[]>([])
+  const [filterCounts, setFilterCounts] = useState<FilterCounts>({
+    industry: [],
+    stage: []
+  })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -154,6 +132,54 @@ export default function InvestmentsPage() {
     fetchStartups()
   }, [])
 
+  // Fetch filter counts
+  useEffect(() => {
+    const fetchFilterCounts = async () => {
+      try {
+        const response = await fetch('/api/startups?query=all');
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+          const startups = result.data.startups || [];
+          
+          // Calculate industry counts
+          const industryCount = startups.reduce((acc: Record<string, number>, startup: Startup) => {
+            if (startup.industry) {
+              acc[startup.industry] = (acc[startup.industry] || 0) + 1;
+            }
+            return acc;
+          }, {});
+
+          // Calculate stage counts
+          const stageCount = startups.reduce((acc: Record<string, number>, startup: Startup) => {
+            if (startup.stage) {
+              acc[startup.stage] = (acc[startup.stage] || 0) + 1;
+            }
+            return acc;
+          }, {});
+
+          // Update filter counts
+          setFilterCounts({
+            industry: Object.entries(industryCount).map(([value, count]) => ({
+              value,
+              label: value === 'AI & Machine Learning' ? 'AI & ML' : value,
+              count: count as number
+            })),
+            stage: Object.entries(stageCount).map(([value, count]) => ({
+              value,
+              label: value,
+              count: count as number
+            }))
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch filter counts:', error);
+      }
+    };
+
+    fetchFilterCounts();
+  }, []);
+
   // Get the current tab's startups
   const currentTabStartups = (() => {
     switch (activeTab) {
@@ -168,7 +194,7 @@ export default function InvestmentsPage() {
     }
   })()
 
-  // Filter and sort startups
+  // Filter startups
   const filteredStartups = currentTabStartups
     .filter((startup) => {
       console.log('Filtering startup:', {
@@ -176,10 +202,7 @@ export default function InvestmentsPage() {
         currentFilters: filters,
         startupValues: {
           industry: startup.industry,
-          stage: startup.stage,
-          location: startup.location,
-          teamSize: startup.teamSize,
-          product_stage: startup.product_stage
+          stage: startup.stage
         }
       });
 
@@ -196,10 +219,7 @@ export default function InvestmentsPage() {
 
       // Category filters - normalize values for comparison
       if (filters.stage && startup.stage.toLowerCase() !== filters.stage.toLowerCase()) return false
-      if (filters.product_stage && startup.product_stage.toLowerCase() !== filters.product_stage.toLowerCase()) return false
       if (filters.industry && startup.industry?.toLowerCase() !== filters.industry.toLowerCase()) return false
-      if (filters.location && startup.location?.toLowerCase() !== filters.location.toLowerCase()) return false
-      if (filters.teamSize && startup.teamSize?.toLowerCase() !== filters.teamSize.toLowerCase()) return false
       
       return true
     })
@@ -220,10 +240,7 @@ export default function InvestmentsPage() {
   const clearFilters = () => {
     setFilters({
       industry: null,
-      stage: null,
-      location: null,
-      teamSize: null,
-      product_stage: null
+      stage: null
     })
     setSearchQuery("")
     setSortBy("default")
@@ -380,119 +397,14 @@ export default function InvestmentsPage() {
           ))}
         </div>
       </div>
-
-      <div>
-        <h3 className="text-lg font-semibold mb-3 flex items-center">
-          <MapPin className="h-4 w-4 mr-2 text-gray-500" />
-          Location
-        </h3>
-        <div className="space-y-2">
-          {filterOptions.location.map((option) => (
-            <Button 
-              key={option.value} 
-              variant={filters.location === option.value ? "default" : "ghost"} 
-              className={`w-full justify-start hover:bg-singlife-light transition-colors ${
-                filters.location === option.value ? 'bg-singlife-primary text-white hover:text-white' : ''
-              }`}
-              onClick={() => {
-                const newFilters = {
-                  ...filters,
-                  location: filters.location === option.value ? null : option.value
-                };
-                console.log('Setting location filter:', {
-                  oldValue: filters.location,
-                  newValue: newFilters.location,
-                  availableStartups: currentTabStartups.map(s => ({
-                    name: s.company_name,
-                    location: s.location
-                  }))
-                });
-                setFilters(newFilters);
-              }}
-            >
-              {option.label}
-              <Badge variant={filters.location === option.value ? "outline" : "secondary"} className="ml-auto">
-                {option.count}
-              </Badge>
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <h3 className="text-lg font-semibold mb-3 flex items-center">
-          <Users2 className="h-4 w-4 mr-2 text-gray-500" />
-          Team Size
-        </h3>
-        <div className="space-y-2">
-          {filterOptions.teamSize.map((option) => (
-            <Button 
-              key={option.value} 
-              variant={filters.teamSize === option.value ? "default" : "ghost"} 
-              className={`w-full justify-start hover:bg-singlife-light transition-colors ${
-                filters.teamSize === option.value ? 'bg-singlife-primary text-white hover:text-white' : ''
-              }`}
-              onClick={() => {
-                const newFilters = {
-                  ...filters,
-                  teamSize: filters.teamSize === option.value ? null : option.value
-                };
-                console.log('Setting teamSize filter:', {
-                  oldValue: filters.teamSize,
-                  newValue: newFilters.teamSize,
-                  availableStartups: currentTabStartups.map(s => ({
-                    name: s.company_name,
-                    teamSize: s.teamSize
-                  }))
-                });
-                setFilters(newFilters);
-              }}
-            >
-              {option.label}
-              <Badge variant={filters.teamSize === option.value ? "outline" : "secondary"} className="ml-auto">
-                {option.count}
-              </Badge>
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <h3 className="text-lg font-semibold mb-3 flex items-center">
-          <Rocket className="h-4 w-4 mr-2 text-gray-500" />
-          Product Stage
-        </h3>
-        <div className="space-y-2">
-          {["Concept", "Beta", "Revenue-generating", "Scaling"].map((stage) => (
-            <Button 
-              key={stage} 
-              variant={filters.product_stage === stage ? "default" : "ghost"} 
-              className={`w-full justify-start hover:bg-singlife-light transition-colors ${
-                filters.product_stage === stage ? 'bg-singlife-primary text-white hover:text-white' : ''
-              }`}
-              onClick={() => {
-                const newFilters = {
-                  ...filters,
-                  product_stage: filters.product_stage === stage ? null : stage
-                };
-                console.log('Setting product_stage filter:', {
-                  oldValue: filters.product_stage,
-                  newValue: newFilters.product_stage,
-                  availableStartups: currentTabStartups.map(s => ({
-                    name: s.company_name,
-                    product_stage: s.product_stage
-                  }))
-                });
-                setFilters(newFilters);
-              }}
-            >
-              {stage}
-            </Button>
-          ))}
-        </div>
-      </div>
     </div>
   )
+
+  // Define available filter options with dynamic counts
+  const filterOptions = {
+    industry: filterCounts.industry,
+    stage: filterCounts.stage
+  }
 
   return (
     <div className="container mx-auto p-6">

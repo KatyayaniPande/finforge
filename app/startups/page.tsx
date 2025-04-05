@@ -21,10 +21,16 @@ interface StartupData {
   location: string;
 }
 
+interface IndustryCount {
+  industry: string;
+  count: number;
+}
+
 export default function StartupsPage() {
   const { isLoading, isAuthorized } = useRequireAuth(['investor', 'startup', 'admin']);
   const { user } = useAuth();
   const [startups, setStartups] = useState<StartupData[]>([]);
+  const [industryCounts, setIndustryCounts] = useState<IndustryCount[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,9 +42,19 @@ export default function StartupsPage() {
   useEffect(() => {
     const fetchStartups = async () => {
       try {
-        const response = await fetch('/api/startups');
-        const data = await response.json();
-        setStartups(data);
+        console.log('Fetching startups and industry counts...');
+        const response = await fetch('/api/startups?query=all');
+        const result = await response.json();
+        console.log('API Response:', result);
+        
+        if (result.success) {
+          setStartups(result.data.startups || []);
+          setIndustryCounts(result.data.industryCounts || []);
+          console.log('Updated startups:', result.data.startups?.length);
+          console.log('Updated industry counts:', result.data.industryCounts);
+        } else {
+          console.error('API Error:', result.error);
+        }
       } catch (error) {
         console.error('Failed to fetch startups:', error);
       } finally {
@@ -48,6 +64,12 @@ export default function StartupsPage() {
 
     fetchStartups();
   }, []);
+
+  // Get the count for a specific industry
+  const getIndustryCount = (industry: string) => {
+    const count = industryCounts.find(ic => ic.industry === industry)?.count || 0;
+    return count;
+  };
 
   if (loading || isLoading) {
     return (
@@ -71,11 +93,13 @@ export default function StartupsPage() {
         </div>
 
         <Tabs defaultValue="all">
-          <TabsList>
-            <TabsTrigger value="all">All Startups</TabsTrigger>
-            <TabsTrigger value="tech">Tech</TabsTrigger>
-            <TabsTrigger value="fintech">Fintech</TabsTrigger>
-            <TabsTrigger value="health">Health</TabsTrigger>
+          <TabsList className="flex flex-wrap">
+            <TabsTrigger value="all">All Startups ({startups.length})</TabsTrigger>
+            {industryCounts.map((ic) => (
+              <TabsTrigger key={ic.industry} value={ic.industry}>
+                {ic.industry === 'AI & Machine Learning' ? 'AI & ML' : ic.industry} ({ic.count})
+              </TabsTrigger>
+            ))}
           </TabsList>
 
           <TabsContent value="all" className="mt-6">
@@ -108,6 +132,41 @@ export default function StartupsPage() {
               ))}
             </div>
           </TabsContent>
+
+          {industryCounts.map((ic) => (
+            <TabsContent key={ic.industry} value={ic.industry} className="mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {startups
+                  .filter((startup) => startup.industry === ic.industry)
+                  .map((startup) => (
+                    <Card key={startup.id}>
+                      <CardHeader>
+                        <CardTitle>{startup.name}</CardTitle>
+                        <CardDescription>{startup.industry} • {startup.stage}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-gray-500 mb-4">{startup.description}</p>
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-sm">Funding Raised</span>
+                            <span className="font-medium">${startup.fundingRaised.toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm">Valuation</span>
+                            <span className="font-medium">${startup.valuation.toLocaleString()}</span>
+                          </div>
+                        </div>
+                        <Button className="w-full mt-4" asChild>
+                          <Link href={`/startups/${startup.id}`}>
+                            View Details
+                          </Link>
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+              </div>
+            </TabsContent>
+          ))}
         </Tabs>
       </div>
     );

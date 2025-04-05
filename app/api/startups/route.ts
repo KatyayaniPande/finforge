@@ -6,7 +6,8 @@ import {
   getHighArrStartups, 
   getStartupsByValuation,
   getAverageTamByStage,
-  getAiStartups
+  getAiStartups,
+  getIndustryCounts
 } from '@/lib/db';
 
 export async function GET(request: Request) {
@@ -20,7 +21,16 @@ export async function GET(request: Request) {
 
     switch (queryType) {
       case 'all':
-        result = await getAllStartups();
+        const [startups, industryCounts] = await Promise.all([
+          getAllStartups(),
+          getIndustryCounts()
+        ]);
+        console.log('Fetched startups:', startups?.length);
+        console.log('Fetched industry counts:', industryCounts);
+        result = { startups, industryCounts };
+        break;
+      case 'industry-counts':
+        result = await getIndustryCounts();
         break;
       case 'by-id':
         if (!id) throw new Error('ID is required for by-id query');

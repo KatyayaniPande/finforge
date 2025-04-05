@@ -57,4 +57,17 @@ export async function getAverageTamByStage() {
 export async function getAiStartups() {
   const db = await openDb();
   return db.all("SELECT company_name, product_short FROM startups WHERE description LIKE '%AI%'");
+}
+
+// Helper function to get industry counts
+export async function getIndustryCounts() {
+  const db = await openDb();
+  const counts = await db.all(`
+    SELECT industry, COUNT(*) as count 
+    FROM startups 
+    GROUP BY industry
+    ORDER BY count DESC
+  `);
+  console.log('Industry counts from DB:', counts);
+  return counts;
 } 
