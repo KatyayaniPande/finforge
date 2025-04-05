@@ -183,7 +183,7 @@ export default function StartupDetailsPage() {
   const formattedTarget = (startup.fundingTarget / 1000000).toFixed(1)
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="p-6">
       <div className="mb-6">
         <Link href="/investments">
           <Button variant="ghost" className="mb-4">
@@ -194,8 +194,8 @@ export default function StartupDetailsPage() {
       </div>
 
       {/* Header */}
-      <div className="flex items-start justify-between mb-8">
-        <div className="flex items-start gap-6">
+      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 mb-8">
+        <div className="flex flex-col lg:flex-row lg:items-start gap-6">
           <div className="w-24 h-24 bg-singlife-light rounded-lg flex items-center justify-center">
             <Icon className="h-12 w-12 text-singlife-primary" />
           </div>
@@ -227,9 +227,9 @@ export default function StartupDetailsPage() {
       </div>
 
       {/* Main Content */}
-      <div className="grid grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Content */}
-        <div className="col-span-2">
+        <div className="lg:col-span-2">
           <Tabs defaultValue="overview" className="space-y-6">
             <TabsList className="w-full">
               <TabsTrigger value="overview" className="flex-1">Company Overview</TabsTrigger>
