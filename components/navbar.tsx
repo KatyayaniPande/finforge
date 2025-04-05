@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, LayoutDashboard, Newspaper, FileText, Info } from 'lucide-react';
+import { MessageSquare, LayoutDashboard, Newspaper, FileText, Info, TrendingUp } from 'lucide-react';
 
 export function Navbar() {
   const pathname = usePathname();
@@ -50,6 +50,14 @@ export function Navbar() {
             >
               <Newspaper className="h-4 w-4" />
               News
+            </Button>
+          </Link>
+          <Link href="/investments">
+            <Button
+              className={`flex items-center gap-2 ${getButtonClass('investments')}`}
+            >
+              <TrendingUp className="h-4 w-4" />
+              Investments
             </Button>
           </Link>
           <Link href="/due-diligence">
