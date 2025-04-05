@@ -226,6 +226,12 @@ export default function InvestmentsPage() {
           <Link href={`/investments/${startup.id}`} className="flex-1">
             <Button variant="outline" className="w-full">View Details</Button>
           </Link>
+          <Link href={`/investments/${startup.id}/risk-analysis`} className="flex-1">
+            <Button variant="outline" className="w-full flex items-center justify-center gap-2 bg-singlife-light hover:bg-singlife-light/90">
+              <TrendingUp className="h-4 w-4" />
+              Investment Insights
+            </Button>
+          </Link>
           <Button className="flex-1 bg-singlife-primary hover:bg-singlife-primary/90">Contact Team</Button>
         </div>
       </Card>
@@ -341,7 +347,7 @@ export default function InvestmentsPage() {
 
         {/* Main Content */}
         <div className="md:col-span-3">
-          <Tabs defaultValue="featured" className="mb-6" onValueChange={setActiveTab}>
+          <Tabs defaultValue="featured" className="mb-6">
             <div className="flex items-center justify-between mb-4">
               <TabsList className="bg-singlife-light">
                 <TabsTrigger value="featured" className="flex items-center gap-2">
