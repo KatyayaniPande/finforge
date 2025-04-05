@@ -73,10 +73,39 @@ const startups = {
         exitPotential: "75/100"
       },
       keyMetrics: {
+        monthlyRevenue: "420K",
+        revenueGrowth: "+28%",
+        ltvCacRatio: "3.2x",
         burnRate: "850K/month",
         runway: "18 months",
         marketSize: "$15B",
+        retention: "92%",
+        churnRate: "0.8%",
         competitors: 8
+      },
+      businessMetrics: {
+        revenue: {
+          current: 420000,
+          growth: 28,
+          trend: "up"
+        },
+        ltv: {
+          value: 125000,
+          trend: "up"
+        },
+        cac: {
+          value: 39000,
+          trend: "down"
+        },
+        retention: {
+          monthly: 92,
+          trend: "up"
+        },
+        market: {
+          tam: 15000000000,
+          penetration: 0.8,
+          trend: "up"
+        }
       },
       simulationParams: {
         marketGrowthRate: {
@@ -123,37 +152,10 @@ const startups = {
 
 type SimulationParamKey = 'marketGrowthRate' | 'competitorImpact' | 'monthlyBurnRate' | 'initialInvestment'
 
-interface SimulationValues {
-  marketGrowthRate: number
-  competitorImpact: number
-  monthlyBurnRate: number
-  initialInvestment: number
-}
-
-interface SimulationResults {
-  expectedReturn: number
-  successRate: number
-  potentialRange: { min: number; max: number }
-  breakEvenTime: number
-}
-
 export default function StartupDetailsPage() {
   const params = useParams()
   const startupId = parseInt(params.id as string)
   const [activeTab, setActiveTab] = useState("overview")
-  const [selectedScenario, setSelectedScenario] = useState("base")
-  const [simulationResults, setSimulationResults] = useState<SimulationResults>({
-    expectedReturn: -0.3,
-    successRate: 0,
-    potentialRange: { min: 0.5, max: 1.1 },
-    breakEvenTime: 0
-  })
-  const [simulationValues, setSimulationValues] = useState<SimulationValues>({
-    marketGrowthRate: 25,
-    competitorImpact: 40,
-    monthlyBurnRate: 850000,
-    initialInvestment: 5000000
-  })
 
   // Find the startup by ID
   const startup = startups.featured.find(s => s.id === startupId)
@@ -163,94 +165,6 @@ export default function StartupDetailsPage() {
   const progress = (startup.fundingCurrent / startup.fundingTarget) * 100
   const formattedCurrent = (startup.fundingCurrent / 1000000).toFixed(1)
   const formattedTarget = (startup.fundingTarget / 1000000).toFixed(1)
-
-  // Monte Carlo simulation calculation
-  const calculateSimulationResults = (values: SimulationValues, scenario: string): SimulationResults => {
-    const {
-      marketGrowthRate,
-      competitorImpact,
-      monthlyBurnRate,
-      initialInvestment
-    } = values
-
-    // Base multipliers for different scenarios
-    const scenarioMultipliers = {
-      base: 1,
-      conservative: 0.8,
-      aggressive: 1.2
-    }
-
-    // Calculate growth factor based on market growth and competitor impact
-    const growthFactor = (marketGrowthRate / 100) * (1 - competitorImpact / 100)
-    
-    // Calculate burn rate impact
-    const burnRateImpact = 1 - (monthlyBurnRate / initialInvestment) * 0.1
-    
-    // Calculate expected return based on scenario
-    const baseReturn = growthFactor * burnRateImpact * scenarioMultipliers[scenario as keyof typeof scenarioMultipliers]
-    const expectedReturn = baseReturn * 5 // 5-year projection
-    
-    // Calculate success rate based on parameters
-    const successRate = Math.min(
-      100,
-      Math.max(
-        0,
-        (marketGrowthRate - competitorImpact) * (1 - monthlyBurnRate / (initialInvestment * 0.2))
-      )
-    )
-    
-    // Calculate potential range
-    const volatility = competitorImpact / 100
-    const minReturn = expectedReturn * (1 - volatility)
-    const maxReturn = expectedReturn * (1 + volatility)
-    
-    // Calculate break-even time (in years)
-    const breakEvenTime = initialInvestment / (monthlyBurnRate * 12) * burnRateImpact
-
-    return {
-      expectedReturn: Number(expectedReturn.toFixed(1)),
-      successRate: Math.round(successRate),
-      potentialRange: {
-        min: Number(minReturn.toFixed(1)),
-        max: Number(maxReturn.toFixed(1))
-      },
-      breakEvenTime: Number(breakEvenTime.toFixed(1))
-    }
-  }
-
-  // Monte Carlo simulation data generation
-  const generateSimulationData = (scenario: string) => {
-    const { initialInvestment, competitorImpact } = simulationValues
-    const results = calculateSimulationResults(simulationValues, scenario)
-    const baseMultiplier = results.expectedReturn
-    
-    return Array.from({ length: 60 }, (_, i) => {
-      const month = i + 1
-      const baseValue = initialInvestment * (1 + baseMultiplier * (month / 60))
-      const volatility = competitorImpact / 100
-      
-      return {
-        month,
-        baseCase: baseValue,
-        baseCaseUpper: baseValue * (1 + volatility * 0.5),
-        baseCaseLower: baseValue * (1 - volatility * 0.5),
-        conservative: baseValue * 0.8,
-        conservativeUpper: baseValue * 0.8 * (1 + volatility * 0.5),
-        conservativeLower: baseValue * 0.8 * (1 - volatility * 0.5),
-        aggressive: baseValue * 1.2,
-        aggressiveUpper: baseValue * 1.2 * (1 + volatility * 0.5),
-        aggressiveLower: baseValue * 1.2 * (1 - volatility * 0.5),
-      }
-    })
-  }
-
-  // Update simulation results when parameters change
-  useEffect(() => {
-    const results = calculateSimulationResults(simulationValues, selectedScenario)
-    setSimulationResults(results)
-  }, [simulationValues, selectedScenario])
-
-  const simulationData = generateSimulationData(selectedScenario)
 
   return (
     <div className="container mx-auto p-6">
@@ -364,168 +278,46 @@ export default function StartupDetailsPage() {
             </TabsContent>
 
             <TabsContent value="risk-analysis">
-              {/* AI Investment Analysis - Moved to top */}
               <Card className="p-6 mb-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">AI Investment Analysis</h3>
-                  <div className="flex gap-2">
-                    <Badge variant="outline" className="bg-green-50">
-                      {startup.aiAnalysis.confidence} Confidence
-                    </Badge>
-                    <Badge variant="outline">AI-Powered</Badge>
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <h3 className="text-lg font-semibold">Risk Analysis</h3>
+                    <p className="text-sm text-gray-500">AI-powered investment risk assessment</p>
                   </div>
+                  <Badge variant="outline" className="bg-blue-50">AI Analysis</Badge>
                 </div>
 
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-xl font-bold text-red-500">
-                      {startup.aiAnalysis.recommendation}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-500">Overall Score:</span>
-                      <Badge variant="outline" className="bg-orange-50 text-orange-700">
-                        72/100
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Growth and Capital Efficiency */}
-                <div className="space-y-6 mb-8">
+                {/* AI Analysis Content */}
+                <div className="grid grid-cols-2 gap-6 mt-6">
                   <div>
-                    <h4 className="font-medium mb-3 text-gray-900">Growth & Capital Efficiency</h4>
-                    <div className="grid grid-cols-3 gap-4 mb-3">
-                      <div className="bg-gray-50 p-3 rounded-lg">
-                        <div className="text-sm text-gray-500">ARR Growth Rate</div>
-                        <div className="text-lg font-semibold text-green-600">+187%</div>
-                      </div>
-                      <div className="bg-gray-50 p-3 rounded-lg">
-                        <div className="text-sm text-gray-500">Growth/Burn Ratio</div>
-                        <div className="text-lg font-semibold">2.2x</div>
-                      </div>
-                      <div className="bg-gray-50 p-3 rounded-lg">
-                        <div className="text-sm text-gray-500">CAC Payback</div>
-                        <div className="text-lg font-semibold">9.5 mo</div>
-                      </div>
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      Strong growth momentum with 187% YoY ARR growth, outperforming 75% of peers. 
-                      Growth efficiency shows promise with a 2.2x growth-to-burn ratio, though CAC payback 
-                      period needs improvement.
-                    </p>
-                  </div>
-
-                  {/* Product-Market Fit */}
-                  <div>
-                    <h4 className="font-medium mb-3 text-gray-900">Product-Market Fit</h4>
-                    <div className="grid grid-cols-3 gap-4 mb-3">
-                      <div className="bg-gray-50 p-3 rounded-lg">
-                        <div className="text-sm text-gray-500">NPS Score</div>
-                        <div className="text-lg font-semibold">72</div>
-                      </div>
-                      <div className="bg-gray-50 p-3 rounded-lg">
-                        <div className="text-sm text-gray-500">12-Mo Retention</div>
-                        <div className="text-lg font-semibold text-green-600">89%</div>
-                      </div>
-                      <div className="bg-gray-50 p-3 rounded-lg">
-                        <div className="text-sm text-gray-500">Expansion Revenue</div>
-                        <div className="text-lg font-semibold">142%</div>
-                      </div>
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      Strong product-market fit indicators with NPS of 72 and exceptional retention at 89%. 
-                      Net revenue retention of 142% suggests strong product stickiness and customer value realization.
-                    </p>
-                  </div>
-
-                  {/* Team and Execution */}
-                  <div>
-                    <h4 className="font-medium mb-3 text-gray-900">Team & Execution</h4>
-                    <div className="grid grid-cols-3 gap-4 mb-3">
-                      <div className="bg-gray-50 p-3 rounded-lg">
-                        <div className="text-sm text-gray-500">Hiring Velocity</div>
-                        <div className="text-lg font-semibold">+12/mo</div>
-                      </div>
-                      <div className="bg-gray-50 p-3 rounded-lg">
-                        <div className="text-sm text-gray-500">Sales Cycle</div>
-                        <div className="text-lg font-semibold">45 days</div>
-                      </div>
-                      <div className="bg-gray-50 p-3 rounded-lg">
-                        <div className="text-sm text-gray-500">Win Rate</div>
-                        <div className="text-lg font-semibold">38%</div>
-                      </div>
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      Team demonstrates strong execution with consistent hiring velocity and improving sales metrics. 
-                      Key executive positions filled in Engineering and Sales, with planned CPO hire in Q3.
-                    </p>
-                  </div>
-
-                  {/* Market Position & Competition */}
-                  <div>
-                    <h4 className="font-medium mb-3 text-gray-900">Market Position & Competition</h4>
-                    <div className="grid grid-cols-3 gap-4 mb-3">
-                      <div className="bg-gray-50 p-3 rounded-lg">
-                        <div className="text-sm text-gray-500">Market Share</div>
-                        <div className="text-lg font-semibold">4.2%</div>
-                      </div>
-                      <div className="bg-gray-50 p-3 rounded-lg">
-                        <div className="text-sm text-gray-500">Pricing Power</div>
-                        <div className="text-lg font-semibold text-green-600">High</div>
-                      </div>
-                      <div className="bg-gray-50 p-3 rounded-lg">
-                        <div className="text-sm text-gray-500">Competitor Count</div>
-                        <div className="text-lg font-semibold">8</div>
-                      </div>
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      Growing market presence with 4.2% share in enterprise segment. Strong pricing power 
-                      demonstrated by 15% price increase acceptance. Competitive position strengthening vs key rivals.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-medium mb-3">Key Strengths</h4>
+                    <h4 className="font-medium mb-3">Key Investment Points</h4>
                     <ul className="space-y-2">
-                      <li className="flex items-center gap-2 text-gray-600">
-                        <ChevronUp className="h-4 w-4 text-green-500" />
-                        Strong growth efficiency metrics (2.2x growth/burn)
-                      </li>
-                      <li className="flex items-center gap-2 text-gray-600">
-                        <ChevronUp className="h-4 w-4 text-green-500" />
-                        Exceptional customer retention (89% at 12 months)
-                      </li>
-                      <li className="flex items-center gap-2 text-gray-600">
-                        <ChevronUp className="h-4 w-4 text-green-500" />
-                        High net revenue retention at 142%
-                      </li>
-                      <li className="flex items-center gap-2 text-gray-600">
-                        <ChevronUp className="h-4 w-4 text-green-500" />
-                        Strong product-market fit indicators (NPS 72)
-                      </li>
+                      {startup.aiAnalysis.keyPoints.map((point, index) => (
+                        <li key={index} className="flex items-center gap-2 text-gray-600">
+                          <div className="h-2 w-2 rounded-full bg-singlife-primary" />
+                          {point}
+                        </li>
+                      ))}
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-medium mb-3">Risk Factors</h4>
+                    <h4 className="font-medium mb-3">Opportunities</h4>
                     <ul className="space-y-2">
-                      <li className="flex items-center gap-2 text-gray-600">
-                        <ChevronDown className="h-4 w-4 text-red-500" />
-                        CAC payback period above target (9.5 months)
-                      </li>
-                      <li className="flex items-center gap-2 text-gray-600">
-                        <ChevronDown className="h-4 w-4 text-red-500" />
-                        Key product leadership position still vacant
-                      </li>
-                      <li className="flex items-center gap-2 text-gray-600">
-                        <ChevronDown className="h-4 w-4 text-red-500" />
-                        Technical debt in core platform components
-                      </li>
-                      <li className="flex items-center gap-2 text-gray-600">
-                        <ChevronDown className="h-4 w-4 text-red-500" />
-                        High competition in enterprise segment
-                      </li>
+                      {startup.aiAnalysis.opportunities.map((opportunity, index) => (
+                        <li key={index} className="flex items-center gap-2 text-gray-600">
+                          <ChevronUp className="h-4 w-4 text-green-500" />
+                          {opportunity}
+                        </li>
+                      ))}
+                    </ul>
+                    <h4 className="font-medium mb-3 mt-6">Risks to Consider</h4>
+                    <ul className="space-y-2">
+                      {startup.aiAnalysis.risks.map((risk, index) => (
+                        <li key={index} className="flex items-center gap-2 text-gray-600">
+                          <ChevronDown className="h-4 w-4 text-red-500" />
+                          {risk}
+                        </li>
+                      ))}
                     </ul>
                   </div>
                 </div>
@@ -589,231 +381,114 @@ export default function StartupDetailsPage() {
                 </Card>
               </div>
 
-              {/* Investment Scenario Simulation */}
-              <Card className="p-6 mb-6">
-                <div className="flex items-center justify-between mb-2">
-                  <div>
-                    <h3 className="text-lg font-semibold">Investment Scenario Simulation</h3>
-                    <p className="text-sm text-gray-500">Compare different investment scenarios and analyze potential outcomes</p>
-                  </div>
-                  <Badge variant="outline" className="bg-blue-50">Monte Carlo Analysis</Badge>
-                </div>
-                
-                <div className="flex gap-2 mb-6">
-                  <Button 
-                    variant={selectedScenario === "base" ? "destructive" : "outline"} 
-                    className={cn(
-                      "flex-1",
-                      selectedScenario === "base" ? "bg-orange-600 hover:bg-orange-700 text-white border-orange-600" : ""
-                    )}
-                    onClick={() => setSelectedScenario("base")}
-                  >
-                    Base Case
-                  </Button>
-                  <Button 
-                    variant={selectedScenario === "conservative" ? "destructive" : "outline"} 
-                    className={cn(
-                      "flex-1",
-                      selectedScenario === "conservative" ? "bg-orange-600 hover:bg-orange-700 text-white border-orange-600" : ""
-                    )}
-                    onClick={() => setSelectedScenario("conservative")}
-                  >
-                    Conservative
-                  </Button>
-                  <Button 
-                    variant={selectedScenario === "aggressive" ? "destructive" : "outline"} 
-                    className={cn(
-                      "flex-1",
-                      selectedScenario === "aggressive" ? "bg-orange-600 hover:bg-orange-700 text-white border-orange-600" : ""
-                    )}
-                    onClick={() => setSelectedScenario("aggressive")}
-                  >
-                    Aggressive
-                  </Button>
-                </div>
-
-                <div className="grid grid-cols-3 gap-6">
-                  <div className="col-span-2">
-                    {/* Monte Carlo Simulation Graph */}
-                    <div className="h-[300px] mb-6">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={simulationData}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                          <XAxis 
-                            dataKey="month" 
-                            axisLine={false}
-                            tickLine={false}
-                            tick={{ fill: '#6b7280', fontSize: 12 }}
-                          />
-                          <YAxis 
-                            axisLine={false}
-                            tickLine={false}
-                            tick={{ fill: '#6b7280', fontSize: 12 }}
-                            tickFormatter={(value) => `$${(value / 1000000).toFixed(0)}M`}
-                          />
-                          <Tooltip 
-                            formatter={(value) => `$${(Number(value) / 1000000).toFixed(1)}M`}
-                            labelFormatter={(label) => `Month ${label}`}
-                          />
-                          {/* Base Case */}
-                          <Area
-                            type="monotone"
-                            dataKey="baseCaseUpper"
-                            stackId="1"
-                            stroke="none"
-                            fill="#fee2e2"
-                            fillOpacity={selectedScenario === "base" ? 0.5 : 0.1}
-                          />
-                          <Area
-                            type="monotone"
-                            dataKey="baseCase"
-                            stackId="2"
-                            stroke="#ef4444"
-                            strokeWidth={selectedScenario === "base" ? 2 : 1}
-                            fill="#fecaca"
-                            fillOpacity={selectedScenario === "base" ? 0.3 : 0.1}
-                          />
-                          <Area
-                            type="monotone"
-                            dataKey="baseCaseLower"
-                            stackId="3"
-                            stroke="none"
-                            fill="#fee2e2"
-                            fillOpacity={selectedScenario === "base" ? 0.5 : 0.1}
-                          />
-                          {/* Conservative Case */}
-                          <Area
-                            type="monotone"
-                            dataKey="conservativeUpper"
-                            stackId="4"
-                            stroke="none"
-                            fill="#e0f2fe"
-                            fillOpacity={selectedScenario === "conservative" ? 0.5 : 0.1}
-                          />
-                          <Area
-                            type="monotone"
-                            dataKey="conservative"
-                            stackId="5"
-                            stroke="#0ea5e9"
-                            strokeWidth={selectedScenario === "conservative" ? 2 : 1}
-                            fill="#bae6fd"
-                            fillOpacity={selectedScenario === "conservative" ? 0.3 : 0.1}
-                          />
-                          <Area
-                            type="monotone"
-                            dataKey="conservativeLower"
-                            stackId="6"
-                            stroke="none"
-                            fill="#e0f2fe"
-                            fillOpacity={selectedScenario === "conservative" ? 0.5 : 0.1}
-                          />
-                          {/* Aggressive Case */}
-                          <Area
-                            type="monotone"
-                            dataKey="aggressiveUpper"
-                            stackId="7"
-                            stroke="none"
-                            fill="#f1f5f9"
-                            fillOpacity={selectedScenario === "aggressive" ? 0.5 : 0.1}
-                          />
-                          <Area
-                            type="monotone"
-                            dataKey="aggressive"
-                            stackId="8"
-                            stroke="#64748b"
-                            strokeWidth={selectedScenario === "aggressive" ? 2 : 1}
-                            fill="#e2e8f0"
-                            fillOpacity={selectedScenario === "aggressive" ? 0.3 : 0.1}
-                          />
-                          <Area
-                            type="monotone"
-                            dataKey="aggressiveLower"
-                            stackId="9"
-                            stroke="none"
-                            fill="#f1f5f9"
-                            fillOpacity={selectedScenario === "aggressive" ? 0.5 : 0.1}
-                          />
-                        </AreaChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-500 mb-4">Simulation Parameters</h4>
-                    <div className="space-y-6">
-                      {(Object.entries(startup.simulationParams) as [SimulationParamKey, any][]).map(([key, value]) => (
-                        <div key={key}>
-                          <div className="flex justify-between mb-2">
-                            <span className="text-sm text-gray-600">
-                              {key.replace(/([A-Z])/g, ' $1').split(' ').map(word => 
-                                word.charAt(0).toUpperCase() + word.slice(1)
-                              ).join(' ')}
-                            </span>
-                          </div>
-                          <div className="relative">
-                            <Slider
-                              defaultValue={[value.current]}
-                              min={value.min}
-                              max={value.max}
-                              step={key.includes('Rate') ? 1 : 100000}
-                              onValueChange={(newValue) => {
-                                setSimulationValues(prev => ({
-                                  ...prev,
-                                  [key]: newValue[0]
-                                }))
-                              }}
-                              className="mb-2"
-                            />
-                          </div>
-                          <div className="flex justify-between mt-1">
-                            <span className="text-xs text-gray-500">
-                              {key.includes('Rate') ? `${value.min}%` : (
-                                value.min >= 1000000
-                                  ? `$${(value.min / 1000000).toFixed(0)}M`
-                                  : `$${(value.min / 1000).toFixed(0)}K`
-                              )}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              {key.includes('Rate') ? `${value.max}%` : (
-                                value.max >= 1000000
-                                  ? `$${(value.max / 1000000).toFixed(0)}M`
-                                  : `$${(value.max / 1000).toFixed(0)}K`
-                              )}
-                            </span>
-                          </div>
+              {/* Business Metrics */}
+              <div className="grid grid-cols-3 gap-6 mb-6">
+                {/* Revenue Metrics */}
+                <Card className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Revenue Metrics</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-gray-600">Monthly Revenue</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold">${startup.keyMetrics.monthlyRevenue}</span>
+                          <Badge variant="outline" className={cn(
+                            "text-xs",
+                            startup.businessMetrics.revenue.trend === "up" ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"
+                          )}>
+                            {startup.keyMetrics.revenueGrowth}
+                          </Badge>
                         </div>
-                      ))}
+                      </div>
+                      <div className="h-1 bg-gray-100 rounded">
+                        <div 
+                          className="h-1 bg-green-500 rounded" 
+                          style={{ width: `${Math.min(startup.businessMetrics.revenue.growth, 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div className="pt-4 border-t">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-600">LTV/CAC Ratio</span>
+                        <span className="font-semibold">{startup.keyMetrics.ltvCacRatio}</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div className="bg-gray-50 p-2 rounded">
+                          <div className="text-gray-500">LTV</div>
+                          <div className="font-medium">${(startup.businessMetrics.ltv.value / 1000).toFixed(1)}k</div>
+                        </div>
+                        <div className="bg-gray-50 p-2 rounded">
+                          <div className="text-gray-500">CAC</div>
+                          <div className="font-medium">${(startup.businessMetrics.cac.value / 1000).toFixed(1)}k</div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Card>
 
-                {/* Simulation Results */}
-                <div className="grid grid-cols-4 gap-4 mt-6">
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <div className="text-sm text-gray-500">Expected Return (5Y)</div>
-                    <div className={cn(
-                      "text-xl font-semibold",
-                      simulationResults.expectedReturn > 0 ? "text-green-500" : "text-red-500"
-                    )}>
-                      {simulationResults.expectedReturn}x
+                {/* Customer Metrics */}
+                <Card className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Customer Metrics</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-gray-600">Monthly Retention</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold">{startup.keyMetrics.retention}</span>
+                          <Badge variant="outline" className="bg-green-50 text-green-700 text-xs">
+                            Strong
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="h-1 bg-gray-100 rounded">
+                        <div 
+                          className="h-1 bg-green-500 rounded" 
+                          style={{ width: `${startup.businessMetrics.retention.monthly}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div className="pt-4 border-t">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-600">Monthly Churn</span>
+                        <span className="font-semibold">{startup.keyMetrics.churnRate}</span>
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        Industry average: 3.2%
+                      </div>
                     </div>
                   </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <div className="text-sm text-gray-500">Success Rate</div>
-                    <div className="text-xl font-semibold">{simulationResults.successRate}%</div>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <div className="text-sm text-gray-500">Potential Range</div>
-                    <div className="text-xl font-semibold">
-                      {simulationResults.potentialRange.min}x - {simulationResults.potentialRange.max}x
+                </Card>
+
+                {/* Market Metrics */}
+                <Card className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Market Metrics</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-gray-600">Total Market Size</span>
+                        <span className="font-semibold">{startup.keyMetrics.marketSize}</span>
+                      </div>
+                      <div className="text-sm text-gray-500 mb-4">
+                        Current market penetration: {startup.businessMetrics.market.penetration}%
+                      </div>
+                    </div>
+                    <div className="pt-4 border-t">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-600">Runway</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold">{startup.keyMetrics.runway}</span>
+                          <Badge variant={startup.keyMetrics.runway.includes("18") ? "outline" : "destructive"} className="text-xs">
+                            {parseInt(startup.keyMetrics.runway) <= 12 ? "Critical" : "Healthy"}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        Burn rate: {startup.keyMetrics.burnRate}
+                      </div>
                     </div>
                   </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <div className="text-sm text-gray-500">Break-Even Time</div>
-                    <div className="text-xl font-semibold">{simulationResults.breakEvenTime} years</div>
-                  </div>
-                </div>
-              </Card>
+                </Card>
+              </div>
             </TabsContent>
           </Tabs>
         </div>
