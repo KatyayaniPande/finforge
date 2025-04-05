@@ -25,7 +25,12 @@ import {
   Wallet,
   SortAsc,
   ChevronDown,
-  X
+  X,
+  DollarSign,
+  ChartBar,
+  User,
+  Calendar,
+  Target
 } from "lucide-react"
 import Link from "next/link"
 import {
@@ -35,155 +40,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-// Sample data for different tabs
-const startups = {
-  featured: [
-    {
-      id: 1,
-      name: "NeuralKey",
-      stage: "Series A",
-      location: "Singapore",
-      description: "Enterprise-grade AI security platform with advanced threat detection and real-time response capabilities.",
-      fundingCurrent: 1200000,
-      fundingTarget: 2000000,
-      daysLeft: 28,
-      tags: ["AI", "Cybersecurity", "Enterprise"],
-      teamSize: 15,
-      rating: 4.8,
-      icon: Shield,
-    },
-    {
-      id: 2,
-      name: "OceanPulse",
-      stage: "Seed",
-      location: "Singapore",
-      description: "Revolutionary ocean monitoring technology providing real-time data for environmental conservation and maritime operations.",
-      fundingCurrent: 900000,
-      fundingTarget: 1500000,
-      daysLeft: 35,
-      tags: ["CleanTech", "Sustainability", "IoT"],
-      teamSize: 8,
-      rating: 4.5,
-      icon: Leaf,
-    },
-    {
-      id: 3,
-      name: "MediSync",
-      stage: "Series A",
-      location: "Singapore",
-      description: "AI-powered healthcare platform streamlining patient care and medical record management across Southeast Asia.",
-      fundingCurrent: 2500000,
-      fundingTarget: 4000000,
-      daysLeft: 42,
-      tags: ["HealthTech", "AI", "SaaS"],
-      teamSize: 25,
-      rating: 4.9,
-      icon: Heart,
-    }
-  ],
-  trending: [
-    {
-      id: 4,
-      name: "FinEdge",
-      stage: "Series B",
-      location: "Singapore",
-      description: "Next-generation fintech platform revolutionizing cross-border payments and digital banking solutions.",
-      fundingCurrent: 8000000,
-      fundingTarget: 12000000,
-      daysLeft: 21,
-      tags: ["FinTech", "Blockchain", "Payments"],
-      teamSize: 45,
-      rating: 4.7,
-      icon: Wallet,
-    },
-    {
-      id: 5,
-      name: "RoboMinds",
-      stage: "Seed",
-      location: "Southeast Asia",
-      description: "Cutting-edge robotics startup developing autonomous solutions for manufacturing and logistics.",
-      fundingCurrent: 750000,
-      fundingTarget: 2000000,
-      daysLeft: 45,
-      tags: ["Robotics", "AI", "Manufacturing"],
-      teamSize: 12,
-      rating: 4.4,
-      icon: Brain,
-    },
-    {
-      id: 6,
-      name: "SpaceVenture",
-      stage: "Series A",
-      location: "Global",
-      description: "Innovative space technology company developing sustainable satellite solutions for global connectivity.",
-      fundingCurrent: 3500000,
-      fundingTarget: 5000000,
-      daysLeft: 30,
-      tags: ["SpaceTech", "Hardware", "Connectivity"],
-      teamSize: 20,
-      rating: 4.6,
-      icon: Rocket,
-    }
-  ],
-  recent: [
-    {
-      id: 7,
-      name: "GreenLoop",
-      stage: "Seed",
-      location: "Singapore",
-      description: "Sustainable packaging solutions using biodegradable materials and circular economy principles.",
-      fundingCurrent: 400000,
-      fundingTarget: 1000000,
-      daysLeft: 60,
-      tags: ["CleanTech", "Sustainability", "Manufacturing"],
-      teamSize: 6,
-      rating: 4.3,
-      icon: Leaf,
-    },
-    {
-      id: 8,
-      name: "DataGuard",
-      stage: "Series A",
-      location: "Southeast Asia",
-      description: "Advanced data privacy and protection platform using quantum-resistant encryption.",
-      fundingCurrent: 1800000,
-      fundingTarget: 3000000,
-      daysLeft: 25,
-      tags: ["Cybersecurity", "Enterprise", "Privacy"],
-      teamSize: 18,
-      rating: 4.7,
-      icon: Shield,
-    },
-    {
-      id: 9,
-      name: "BioInnovate",
-      stage: "Series B",
-      location: "Global",
-      description: "Biotechnology company developing breakthrough solutions for sustainable agriculture.",
-      fundingCurrent: 5500000,
-      fundingTarget: 8000000,
-      daysLeft: 15,
-      tags: ["BioTech", "Agriculture", "Sustainability"],
-      teamSize: 35,
-      rating: 4.8,
-      icon: Heart,
-    }
-  ]
-}
-
 interface Startup {
   id: number
-  name: string
+  company_name: string
   stage: string
-  location: string
+  product_short: string
   description: string
-  fundingCurrent: number
-  fundingTarget: number
-  daysLeft: number
-  tags: string[]
-  teamSize: number
-  rating: number
-  icon: React.ComponentType<{ className?: string }>
+  arr: string
+  founders: string
+  tam: string
+  market_growth_rate: string
+  product_stage: string
+  user_growth: string
+  revenue_growth: string
+  current_valuation: string
+  projected_exit_value: string
+  exit_timeline: string
 }
 
 interface StartupsData {
@@ -197,12 +69,7 @@ interface FilterState {
   stage: string | null
   location: string | null
   teamSize: string | null
-}
-
-interface FilterOption {
-  value: string
-  label: string
-  count: number
+  product_stage: string | null
 }
 
 // Define available filter options
@@ -237,50 +104,125 @@ const filterOptions = {
   ]
 }
 
+// Sample data - Replace with actual database fetch
+const startups: StartupsData = {
+  featured: [
+    {
+      id: 1,
+      company_name: "NeuralKey",
+      stage: "Series A",
+      product_short: "AI Security Platform",
+      description: "Enterprise-grade AI security platform with advanced threat detection and real-time response capabilities.",
+      arr: "$1.2M",
+      founders: "John Smith, Sarah Johnson",
+      tam: "$15B",
+      market_growth_rate: "28% CAGR",
+      product_stage: "Revenue-generating",
+      user_growth: "42% MoM",
+      revenue_growth: "35% MoM",
+      current_valuation: "$15M",
+      projected_exit_value: "$120M",
+      exit_timeline: "3-5 years"
+    },
+    {
+      id: 2,
+      company_name: "OceanPulse",
+      stage: "Seed",
+      product_short: "Ocean Monitoring Tech",
+      description: "Revolutionary ocean monitoring technology providing real-time data for environmental conservation.",
+      arr: "$500K",
+      founders: "Michael Chen, Lisa Wong",
+      tam: "$8B",
+      market_growth_rate: "22% CAGR",
+      product_stage: "Beta",
+      user_growth: "35% MoM",
+      revenue_growth: "28% MoM",
+      current_valuation: "$8M",
+      projected_exit_value: "$80M",
+      exit_timeline: "4-6 years"
+    }
+  ],
+  trending: [
+    {
+      id: 3,
+      company_name: "MediSync",
+      stage: "Series A",
+      product_short: "Healthcare Platform",
+      description: "AI-powered healthcare platform streamlining patient care and medical record management.",
+      arr: "$2.5M",
+      founders: "David Lee, Emily Tan",
+      tam: "$12B",
+      market_growth_rate: "35% CAGR",
+      product_stage: "Revenue-generating",
+      user_growth: "45% MoM",
+      revenue_growth: "38% MoM",
+      current_valuation: "$25M",
+      projected_exit_value: "$150M",
+      exit_timeline: "3-4 years"
+    }
+  ],
+  recent: [
+    {
+      id: 4,
+      company_name: "FinEdge",
+      stage: "Series B",
+      product_short: "FinTech Platform",
+      description: "Next-generation fintech platform revolutionizing cross-border payments.",
+      arr: "$5M",
+      founders: "James Wilson, Sarah Chen",
+      tam: "$20B",
+      market_growth_rate: "30% CAGR",
+      product_stage: "Scaling",
+      user_growth: "50% MoM",
+      revenue_growth: "40% MoM",
+      current_valuation: "$50M",
+      projected_exit_value: "$200M",
+      exit_timeline: "2-3 years"
+    }
+  ]
+}
+
 export default function InvestmentsPage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [activeTab, setActiveTab] = useState("featured")
   const [searchQuery, setSearchQuery] = useState("")
-  const [sortBy, setSortBy] = useState<"default" | "fundingProgress" | "rating" | "daysLeft">("default")
+  const [sortBy, setSortBy] = useState<"default" | "valuation" | "growth" | "stage">("default")
   const [filters, setFilters] = useState<FilterState>({
     industry: null,
     stage: null,
     location: null,
     teamSize: null,
+    product_stage: null
   })
 
   // Filter and sort startups
   const filteredStartups = startups[activeTab as keyof StartupsData]
-    .filter((startup: Startup) => {
+    .filter((startup) => {
       // Search filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase()
         const matchesSearch = 
-          startup.name.toLowerCase().includes(query) ||
+          startup.company_name.toLowerCase().includes(query) ||
           startup.description.toLowerCase().includes(query) ||
-          startup.tags.some(tag => tag.toLowerCase().includes(query)) ||
-          startup.location.toLowerCase().includes(query)
+          startup.product_short.toLowerCase().includes(query) ||
+          startup.founders.toLowerCase().includes(query)
         if (!matchesSearch) return false
       }
 
       // Category filters
-      if (filters.industry && !startup.tags.includes(filters.industry)) return false
       if (filters.stage && startup.stage !== filters.stage) return false
-      if (filters.location && startup.location !== filters.location) return false
-      if (filters.teamSize) {
-        const [min, max] = filters.teamSize.split('-').map(Number)
-        if (startup.teamSize < min || (max && startup.teamSize > max)) return false
-      }
+      if (filters.product_stage && startup.product_stage !== filters.product_stage) return false
       return true
     })
     .sort((a, b) => {
       switch (sortBy) {
-        case "fundingProgress":
-          return (b.fundingCurrent / b.fundingTarget) - (a.fundingCurrent / a.fundingTarget)
-        case "rating":
-          return b.rating - a.rating
-        case "daysLeft":
-          return a.daysLeft - b.daysLeft
+        case "valuation":
+          return parseFloat(b.current_valuation.replace('$', '')) - parseFloat(a.current_valuation.replace('$', ''))
+        case "growth":
+          return parseFloat(b.revenue_growth.replace('%', '')) - parseFloat(a.revenue_growth.replace('%', ''))
+        case "stage":
+          const stageOrder: Record<string, number> = { "Seed": 0, "Series A": 1, "Series B": 2, "Series C+": 3 }
+          return (stageOrder[b.stage] || 0) - (stageOrder[a.stage] || 0)
         default:
           return 0
       }
@@ -292,6 +234,7 @@ export default function InvestmentsPage() {
       stage: null,
       location: null,
       teamSize: null,
+      product_stage: null
     })
     setSearchQuery("")
     setSortBy("default")
@@ -301,26 +244,18 @@ export default function InvestmentsPage() {
   const activeFiltersCount = Object.values(filters).filter(Boolean).length + (searchQuery ? 1 : 0)
 
   const StartupCard = ({ startup }: { startup: Startup }) => {
-    const Icon = startup.icon
-    const progress = (startup.fundingCurrent / startup.fundingTarget) * 100
-    const formattedCurrent = (startup.fundingCurrent / 1000000).toFixed(1)
-    const formattedTarget = (startup.fundingTarget / 1000000).toFixed(1)
-
-  return (
+    return (
       <Card className="group p-6 hover:shadow-lg transition-all duration-300 flex flex-col h-full border-2 hover:border-singlife-primary">
         <div className="flex items-start gap-4 mb-4">
           <div className="w-16 h-16 bg-singlife-light rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-singlife-primary/10 transition-colors">
-            <Icon className="h-8 w-8 text-singlife-primary" />
+            <Building2 className="h-8 w-8 text-singlife-primary" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <h3 className="text-xl font-bold truncate">{startup.name}</h3>
+              <h3 className="text-xl font-bold truncate">{startup.company_name}</h3>
               <Badge variant="outline" className="bg-singlife-light whitespace-nowrap">{startup.stage}</Badge>
             </div>
-            <div className="flex items-center text-sm text-gray-500">
-              <MapPin className="h-3 w-3 mr-1 flex-shrink-0" /> 
-              <span className="truncate">{startup.location}</span>
-            </div>
+            <p className="text-sm text-gray-500">{startup.product_short}</p>
           </div>
         </div>
 
@@ -328,43 +263,41 @@ export default function InvestmentsPage() {
           {startup.description}
         </p>
 
-        <div className="mb-4">
-          <div className="flex justify-between mb-2">
-            <span className="text-sm text-gray-500">Funding Progress</span>
-            <span className="text-sm font-medium whitespace-nowrap">${formattedCurrent}M / ${formattedTarget}M</span>
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm">
+              <DollarSign className="h-4 w-4 text-gray-500" />
+              <span className="font-medium">{startup.arr}</span>
+              <span className="text-gray-500">ARR</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <ChartBar className="h-4 w-4 text-gray-500" />
+              <span className="font-medium">{startup.revenue_growth}</span>
+              <span className="text-gray-500">Growth</span>
+            </div>
           </div>
-          <Progress 
-            value={progress} 
-            className="h-2 group-hover:h-3 transition-all"
-            indicatorClassName={progress >= 80 ? "bg-green-500" : progress >= 50 ? "bg-yellow-500" : "bg-singlife-primary"}
-          />
-          <div className="flex justify-between mt-1">
-            <span className="text-xs text-gray-500">{progress.toFixed(1)}% Funded</span>
-            <span className="text-xs text-gray-500">{startup.daysLeft} days left</span>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm">
+              <Target className="h-4 w-4 text-gray-500" />
+              <span className="font-medium">{startup.tam}</span>
+              <span className="text-gray-500">TAM</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <Calendar className="h-4 w-4 text-gray-500" />
+              <span className="font-medium">{startup.exit_timeline}</span>
+              <span className="text-gray-500">Exit</span>
+            </div>
           </div>
-        </div>
-
-        <div className="flex flex-wrap gap-2 mb-4">
-          {startup.tags.map((tag: string) => (
-            <Badge 
-              key={tag} 
-              variant="secondary" 
-              className="whitespace-nowrap cursor-pointer hover:bg-singlife-primary hover:text-white transition-colors"
-              onClick={() => setFilters(prev => ({ ...prev, industry: tag }))}
-            >
-              {tag}
-            </Badge>
-          ))}
         </div>
 
         <div className="flex items-center justify-between mb-4 text-sm">
           <div className="flex items-center gap-2">
-            <Users2 className="h-4 w-4 text-gray-500 flex-shrink-0" />
-            <span className="whitespace-nowrap">Team of {startup.teamSize}</span>
+            <User className="h-4 w-4 text-gray-500" />
+            <span className="whitespace-nowrap">{startup.founders}</span>
           </div>
           <div className="flex items-center gap-2">
-            <Star className="h-4 w-4 text-yellow-400 flex-shrink-0" />
-            <span className="whitespace-nowrap">{startup.rating}/5 Rating</span>
+            <TrendingUp className="h-4 w-4 text-green-500" />
+            <span className="whitespace-nowrap">{startup.market_growth_rate}</span>
           </div>
         </div>
 
@@ -499,20 +432,30 @@ export default function InvestmentsPage() {
         </div>
       </div>
 
-      <div className="flex gap-2">
-        <Button 
-          variant="outline" 
-          className="flex-1" 
-          onClick={clearFilters}
-        >
-          Clear Filters
-        </Button>
-        <Button 
-          className="flex-1 bg-singlife-primary hover:bg-singlife-primary/90"
-          onClick={() => setIsFilterOpen(false)}
-        >
-          Apply Filters
-        </Button>
+      <div>
+        <h3 className="text-lg font-semibold mb-3 flex items-center">
+          <Rocket className="h-4 w-4 mr-2 text-gray-500" />
+          Product Stage
+        </h3>
+        <div className="space-y-2">
+          {["Concept", "Beta", "Revenue-generating", "Scaling"].map((stage) => (
+            <Button 
+              key={stage} 
+              variant={filters.product_stage === stage ? "default" : "ghost"} 
+              className={`w-full justify-start hover:bg-singlife-light transition-colors ${
+                filters.product_stage === stage ? 'bg-singlife-primary text-white hover:text-white' : ''
+              }`}
+              onClick={() => {
+                setFilters(prev => ({
+                  ...prev,
+                  product_stage: prev.product_stage === stage ? null : stage
+                }))
+              }}
+            >
+              {stage}
+            </Button>
+          ))}
+        </div>
       </div>
     </div>
   )
@@ -529,7 +472,7 @@ export default function InvestmentsPage() {
           <div className="relative flex-1 md:w-96">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input 
-              placeholder="Search startups, industries, or locations..." 
+              placeholder="Search startups, products, or founders..." 
               className="pl-10 pr-4 w-full"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -577,14 +520,14 @@ export default function InvestmentsPage() {
               <DropdownMenuItem onClick={() => setSortBy("default")}>
                 Default
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("fundingProgress")}>
-                Funding Progress
+              <DropdownMenuItem onClick={() => setSortBy("valuation")}>
+                Valuation
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("rating")}>
-                Rating
+              <DropdownMenuItem onClick={() => setSortBy("growth")}>
+                Growth Rate
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("daysLeft")}>
-                Time Left
+              <DropdownMenuItem onClick={() => setSortBy("stage")}>
+                Stage
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -615,61 +558,38 @@ export default function InvestmentsPage() {
 
         {/* Main Content */}
         <div className="md:col-span-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-            <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
-              <Button
-                variant={activeTab === "featured" ? "default" : "outline"}
-                onClick={() => setActiveTab("featured")}
-                className="flex items-center gap-2 whitespace-nowrap"
-              >
-                <Star className="h-4 w-4" />
-                Featured
-              </Button>
-              <Button
-                variant={activeTab === "trending" ? "default" : "outline"}
-                onClick={() => setActiveTab("trending")}
-                className="flex items-center gap-2 whitespace-nowrap"
-              >
-                <TrendingUp className="h-4 w-4" />
-                Trending
-              </Button>
-              <Button
-                variant={activeTab === "recent" ? "default" : "outline"}
-                onClick={() => setActiveTab("recent")}
-                className="flex items-center gap-2 whitespace-nowrap"
-              >
-                <Clock className="h-4 w-4" />
-                Recent
-              </Button>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-sm text-gray-500">
-                Showing {filteredStartups.length} startups
-              </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="md:hidden">
-                    <SortAsc className="h-4 w-4 mr-2" />
-                    Sort
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => setSortBy("default")}>
-                    Default
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSortBy("fundingProgress")}>
-                    Funding Progress
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSortBy("rating")}>
-                    Rating
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSortBy("daysLeft")}>
-                    Time Left
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-      </div>
+          <div className="flex flex-wrap gap-2 mb-6">
+            <Button
+              variant={activeTab === "featured" ? "default" : "outline"}
+              onClick={() => setActiveTab("featured")}
+              className={`flex items-center gap-2 whitespace-nowrap ${
+                activeTab === "featured" ? 'bg-singlife-primary text-white hover:bg-singlife-primary/90' : ''
+              }`}
+            >
+              <Star className="h-4 w-4" />
+              Featured
+            </Button>
+            <Button
+              variant={activeTab === "trending" ? "default" : "outline"}
+              onClick={() => setActiveTab("trending")}
+              className={`flex items-center gap-2 whitespace-nowrap ${
+                activeTab === "trending" ? 'bg-singlife-primary text-white hover:bg-singlife-primary/90' : ''
+              }`}
+            >
+              <TrendingUp className="h-4 w-4" />
+              Trending
+            </Button>
+            <Button
+              variant={activeTab === "recent" ? "default" : "outline"}
+              onClick={() => setActiveTab("recent")}
+              className={`flex items-center gap-2 whitespace-nowrap ${
+                activeTab === "recent" ? 'bg-singlife-primary text-white hover:bg-singlife-primary/90' : ''
+              }`}
+            >
+              <Clock className="h-4 w-4" />
+              Recent
+            </Button>
+          </div>
 
           {filteredStartups.length === 0 ? (
             <Card className="p-12 text-center">
@@ -681,7 +601,7 @@ export default function InvestmentsPage() {
                 Try adjusting your search or filters to find what you're looking for.
               </p>
               <Button onClick={clearFilters}>Clear All Filters</Button>
-        </Card>
+            </Card>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {filteredStartups.map((startup) => (
