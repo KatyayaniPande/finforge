@@ -8,7 +8,7 @@ export const metadata = {
   title: 'StockBot powered by Groq'
 }
 
-export default async function IndexPage() {
+export default async function ChatPage() {
   const id = nanoid()
   const missingKeys = await getMissingKeys()
 
@@ -17,4 +17,4 @@ export default async function IndexPage() {
       <Chat id={id} missingKeys={missingKeys} />
     </AI>
   )
-}
+} 
