@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+<<<<<<< HEAD
 import { 
   Home, 
   FileText, 
@@ -19,6 +20,9 @@ import {
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useSidebar } from './sidebar-context';
+=======
+import { MessageSquare, LayoutDashboard, Newspaper, FileText, Info, TrendingUp } from 'lucide-react';
+>>>>>>> 6d03fd754a91e604042336c2158d197c639bd575
 
 export function Navbar() {
   const pathname = usePathname();
@@ -59,7 +63,18 @@ export function Navbar() {
               {!isCollapsed && "Dashboard"}
             </Button>
           </Link>
+<<<<<<< HEAD
 
+=======
+          <Link href="/investments">
+            <Button
+              className={`flex items-center gap-2 ${getButtonClass('investments')}`}
+            >
+              <TrendingUp className="h-4 w-4" />
+              Investments
+            </Button>
+          </Link>
+>>>>>>> 6d03fd754a91e604042336c2158d197c639bd575
           <Link href="/due-diligence">
             <Button
               variant="ghost"
