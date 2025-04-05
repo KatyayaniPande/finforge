@@ -98,41 +98,35 @@ export default function StartupDetailsPage() {
     const fetchStartup = async () => {
       try {
         console.log('Detail Page: Starting to fetch startup details for ID:', startupId);
-        setLoading(true)
-        setError(null)
+        setLoading(true);
+        setError(null);
 
-        console.log('Detail Page: Making API request...');
-        const response = await fetch(`/api/investments?id=${startupId}`)
+        const response = await fetch(`/api/investments?id=${startupId}`);
         
-        console.log('Detail Page: API Response status:', response.status);
-
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Detail Page: Error response:', errorText);
-          throw new Error('Failed to fetch startup details')
+          throw new Error('Failed to fetch startup details');
         }
 
-        console.log('Detail Page: Parsing JSON response...');
-        const { data } = await response.json()
-        console.log('Detail Page: Received startup data:', data);
+        const { data } = await response.json();
+        setStartup(data);
 
-        setStartup(data)
-        
-        // Auto-generate analysis once startup data is loaded
+        // Generate analysis as soon as we have the startup data
         if (data) {
-          console.log('Detail Page: Auto-generating analysis...');
+          console.log('Detail Page: Automatically generating analysis for:', data.company_name);
           generateAnalysis(data);
         }
       } catch (err) {
-        console.error('Detail Page Error:', err)
-        setError('Failed to load startup details')
+        console.error('Detail Page Error:', err);
+        setError('Failed to load startup details');
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchStartup()
-  }, [startupId])
+    if (startupId) {
+      fetchStartup();
+    }
+  }, [startupId]);
 
   const generateAnalysis = async (startup: Startup) => {
     console.log('Generating analysis for startup:', startup.company_name);
