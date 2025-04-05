@@ -1,57 +1,147 @@
-import { Metadata } from 'next'
+'use client';
+
+import { useEffect, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
+import { getMarketNews } from '@/lib/services/news-service';
+import { formatDistanceToNow } from 'date-fns';
+import { ArrowUpIcon, ArrowDownIcon, MinusIcon } from '@radix-ui/react-icons';
 
-export const metadata: Metadata = {
-  title: 'News & Market Sentiment',
-  description: 'Real-time market news and sentiment analysis'
+interface NewsItem {
+  title: string;
+  url: string;
+  time_published: string;
+  summary: string;
+  source: string;
+  category: string;
+  sectors: string[];
+  sentiment?: {
+    score: number;
+    label: string;
+    confidence: number;
+    impact: 'high' | 'medium' | 'low';
+  };
 }
 
-// Sample data - in a real app, this would come from an API
-const sectors = [
-  { name: 'Technology', sentiment: 75, change: '+2.5%', news: 12 },
-  { name: 'Finance', sentiment: 68, change: '-1.2%', news: 8 },
-  { name: 'Healthcare', sentiment: 82, change: '+3.1%', news: 10 },
-  { name: 'Energy', sentiment: 45, change: '-4.3%', news: 6 },
-  { name: 'Consumer Goods', sentiment: 60, change: '+0.8%', news: 7 },
-  { name: 'Real Estate', sentiment: 52, change: '-2.1%', news: 5 },
-  { name: 'Industrials', sentiment: 58, change: '+1.5%', news: 9 },
-  { name: 'Materials', sentiment: 49, change: '-3.2%', news: 4 }
-]
-
-const aiSummaries = [
-  {
-    title: 'Market Overview',
-    content: 'The technology sector continues to lead market gains, driven by AI innovations and strong earnings from major tech companies. Healthcare shows resilience with positive sentiment, while energy and materials face headwinds due to global economic concerns.'
-  },
-  {
-    title: 'Key Insights',
-    content: 'Market volatility remains elevated as investors digest mixed economic data. Tech stocks are benefiting from AI-driven growth, while traditional sectors like finance and real estate show signs of weakness. Overall market sentiment is cautiously optimistic.'
-  },
-  {
-    title: 'Trending Analysis',
-    content: 'AI and semiconductor companies are seeing increased investment flows. Financial technology adoption is accelerating, while traditional banking faces regulatory challenges. Healthcare innovation, particularly in biotech, is attracting significant attention.'
-  }
-]
+interface MarketNews {
+  items: NewsItem[];
+  sentiment: {
+    overall: number;
+    byCategory: {
+      [key: string]: number;
+    };
+    bySector: {
+      [key: string]: {
+        sentiment: number;
+        articles: number;
+        trend: 'up' | 'down' | 'stable';
+      };
+    };
+    marketImpact: {
+      bullish: number;
+      bearish: number;
+      neutral: number;
+    };
+    trendingTopics: {
+      topic: string;
+      count: number;
+      sentiment: number;
+    }[];
+  };
+}
 
 export default function NewsPage() {
+  const [news, setNews] = useState<MarketNews | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchNews() {
+      try {
+        console.log('Starting news fetch...');
+        const data = await getMarketNews();
+        console.log('News data received:', data);
+        setNews(data);
+      } catch (err) {
+        console.error('Error in news page:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch news data');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchNews();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex-1 space-y-4 p-8 pt-6">
+        <div className="flex items-center justify-between space-y-2">
+          <h2 className="text-3xl font-bold tracking-tight">Loading news...</h2>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !news) {
+    return (
+      <div className="flex-1 space-y-4 p-8 pt-6">
+        <div className="flex items-center justify-between space-y-2">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight text-red-500">Error Loading News</h2>
+            <p className="mt-2 text-muted-foreground">{error || 'No news data available'}</p>
+            <p className="mt-4">Please check:</p>
+            <ul className="list-disc pl-6 mt-2">
+              <li>Your Alpha Vantage API key is correctly set in .env.local</li>
+              <li>Your internet connection is working</li>
+              <li>The Alpha Vantage API service is available</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Group news items by category
+  const categorizedNews = news.items.reduce<Record<string, NewsItem[]>>((acc, item) => {
+    if (!acc[item.category]) {
+      acc[item.category] = [];
+    }
+    acc[item.category].push(item);
+    return acc;
+  }, {});
+
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">News & Market Sentiment</h2>
       </div>
       
-      {/* AI-Generated Summaries */}
+      {/* Featured News */}
       <div className="grid gap-4 md:grid-cols-3">
-        {aiSummaries.map((summary, index) => (
+        {news.items.slice(0, 3).map((item, index) => (
           <Card key={index}>
             <CardHeader>
-              <CardTitle className="text-lg">{summary.title}</CardTitle>
+              <CardTitle className="text-lg">{item.title}</CardTitle>
+              <CardDescription>{item.source}</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">{summary.content}</p>
+              <p className="text-sm text-muted-foreground">{item.summary}</p>
+              <div className="mt-4 flex justify-between items-center">
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-600 hover:underline"
+                >
+                  Read more
+                </a>
+                <span className="text-xs text-muted-foreground">
+                  {formatDistanceToNow(new Date(item.time_published), { addSuffix: true })}
+                </span>
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -70,30 +160,18 @@ export default function NewsPage() {
             <div className="col-span-2 rounded-lg border bg-card p-6">
               <h3 className="text-xl font-semibold mb-4">Latest Market News</h3>
               <div className="space-y-4">
-                <div className="border-b pb-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <h4 className="font-medium">Tech Stocks Rally on AI Breakthroughs</h4>
-                    <Badge variant="outline">Technology</Badge>
+                {news.items.slice(3, 6).map((item, index) => (
+                  <div key={index} className={index < 2 ? "border-b pb-4" : "pb-4"}>
+                    <div className="flex justify-between items-center mb-2">
+                      <h4 className="font-medium">{item.title}</h4>
+                      <Badge variant="outline">{item.category}</Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{item.summary}</p>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {formatDistanceToNow(new Date(item.time_published), { addSuffix: true })}
+                    </p>
                   </div>
-                  <p className="text-sm text-muted-foreground">Major technology companies reported stronger-than-expected earnings, driven by AI product adoption.</p>
-                  <p className="text-xs text-muted-foreground mt-2">2 hours ago</p>
-                </div>
-                <div className="border-b pb-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <h4 className="font-medium">Federal Reserve Signals Potential Rate Cut</h4>
-                    <Badge variant="outline">Finance</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">The Federal Reserve's latest meeting minutes suggest a possible shift in monetary policy.</p>
-                  <p className="text-xs text-muted-foreground mt-2">5 hours ago</p>
-                </div>
-                <div className="pb-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <h4 className="font-medium">Healthcare Innovation Drives Sector Growth</h4>
-                    <Badge variant="outline">Healthcare</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">New medical technologies and treatments are boosting healthcare company valuations.</p>
-                  <p className="text-xs text-muted-foreground mt-2">8 hours ago</p>
-                </div>
+                ))}
               </div>
             </div>
 
@@ -104,119 +182,162 @@ export default function NewsPage() {
                 <div className="border-b pb-4">
                   <h4 className="font-medium">Overall Sentiment</h4>
                   <div className="flex items-center gap-2 mt-2">
-                    <Progress value={65} className="h-2" />
-                    <span className="text-sm font-medium">65%</span>
+                    <Progress value={news.sentiment.overall} className="h-2" />
+                    <span className="text-sm font-medium">{Math.round(news.sentiment.overall)}%</span>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-2">Moderately Bullish</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    {news.sentiment.overall > 60 ? 'Bullish' : 
+                     news.sentiment.overall < 40 ? 'Bearish' : 'Neutral'}
+                  </p>
                 </div>
-                <div className="border-b pb-4">
-                  <h4 className="font-medium">Fear & Greed Index</h4>
-                  <div className="flex items-center gap-2 mt-2">
-                    <Progress value={55} className="h-2" />
-                    <span className="text-sm font-medium">55</span>
+                {Object.entries(news.sentiment.byCategory).map(([category, sentiment], index, array) => (
+                  <div key={category} className={index < array.length - 1 ? "border-b pb-4" : "pb-4"}>
+                    <h4 className="font-medium">{category}</h4>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Progress value={sentiment} className="h-2" />
+                      <span className="text-sm font-medium">{Math.round(sentiment)}%</span>
+                    </div>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-2">Neutral</p>
-                </div>
-                <div className="pb-4">
-                  <h4 className="font-medium">Market Volatility</h4>
-                  <div className="flex items-center gap-2 mt-2">
-                    <Progress value={40} className="h-2" />
-                    <span className="text-sm font-medium">40%</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-2">Moderate</p>
-                </div>
+                ))}
               </div>
             </div>
           </div>
         </TabsContent>
         
         <TabsContent value="sectors" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {sectors.map((sector, index) => (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {Object.entries(news.sentiment.bySector).map(([sector, data], index) => (
               <Card key={index}>
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-center">
-                    <CardTitle className="text-lg">{sector.name}</CardTitle>
-                    <Badge variant={sector.change.startsWith('+') ? 'default' : 'destructive'}>
-                      {sector.change}
-                    </Badge>
+                    <CardTitle className="text-lg capitalize">{sector}</CardTitle>
+                    <div className="flex items-center gap-1">
+                      {data.trend === 'up' && <ArrowUpIcon className="text-green-500" />}
+                      {data.trend === 'down' && <ArrowDownIcon className="text-red-500" />}
+                      {data.trend === 'stable' && <MinusIcon className="text-yellow-500" />}
+                      <Badge variant={data.sentiment > 60 ? "default" : data.sentiment < 40 ? "destructive" : "secondary"}>
+                        {Math.round(data.sentiment)}%
+                      </Badge>
+                    </div>
                   </div>
-                  <CardDescription>{sector.news} news items</CardDescription>
+                  <CardDescription>
+                    {data.articles} articles • Trend: {data.trend}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Sentiment</span>
-                      <span>{sector.sentiment}%</span>
-                    </div>
-                    <Progress value={sector.sentiment} className="h-2" />
+                    <Progress 
+                      value={data.sentiment} 
+                      className="h-2"
+                      indicatorClassName={
+                        data.sentiment > 60 ? "bg-green-500" : 
+                        data.sentiment < 40 ? "bg-red-500" : 
+                        "bg-yellow-500"
+                      }
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      {data.sentiment > 60 ? 'Bullish' : 
+                       data.sentiment < 40 ? 'Bearish' : 
+                       'Neutral'} sentiment
+                    </p>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Sector Performance</CardTitle>
+                <CardDescription>Relative sentiment across sectors</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {Object.entries(news.sentiment.bySector)
+                    .sort(([, a], [, b]) => b.sentiment - a.sentiment)
+                    .map(([sector, data], index) => (
+                      <div key={index} className="space-y-1">
+                        <div className="flex justify-between text-sm">
+                          <span className="capitalize">{sector}</span>
+                          <span className="flex items-center gap-1">
+                            {data.trend === 'up' && <ArrowUpIcon className="text-green-500" />}
+                            {data.trend === 'down' && <ArrowDownIcon className="text-red-500" />}
+                            {data.trend === 'stable' && <MinusIcon className="text-yellow-500" />}
+                            {Math.round(data.sentiment)}%
+                          </span>
+                        </div>
+                        <Progress 
+                          value={data.sentiment} 
+                          className="h-1.5"
+                          indicatorClassName={
+                            data.sentiment > 60 ? "bg-green-500" : 
+                            data.sentiment < 40 ? "bg-red-500" : 
+                            "bg-yellow-500"
+                          }
+                        />
+                      </div>
+                    ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Sector Activity</CardTitle>
+                <CardDescription>Number of articles by sector</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {Object.entries(news.sentiment.bySector)
+                    .sort(([, a], [, b]) => b.articles - a.articles)
+                    .map(([sector, data], index) => (
+                      <div key={index} className="flex justify-between items-center">
+                        <span className="capitalize">{sector}</span>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline">{data.articles} articles</Badge>
+                          {data.trend === 'up' && <ArrowUpIcon className="text-green-500" />}
+                          {data.trend === 'down' && <ArrowDownIcon className="text-red-500" />}
+                          {data.trend === 'stable' && <MinusIcon className="text-yellow-500" />}
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
         
         <TabsContent value="trending" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
-            {/* Trending Topics Section */}
-            <div className="rounded-lg border bg-card p-6">
-              <h3 className="text-xl font-semibold mb-4">Trending Topics</h3>
-              <div className="space-y-4">
-                <div className="border-b pb-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <h4 className="font-medium">Artificial Intelligence</h4>
-                    <Badge variant="secondary">+32%</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">AI companies and technologies are driving market growth and innovation.</p>
+            <Card>
+              <CardHeader>
+                <CardTitle>Trending Topics</CardTitle>
+                <CardDescription>Based on news coverage and sentiment</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {Object.entries(news.sentiment.byCategory)
+                    .sort(([, a], [, b]) => b - a)
+                    .map(([category, sentiment], index) => (
+                      <div key={index} className="border-b last:border-0 pb-4 last:pb-0">
+                        <div className="flex justify-between items-center mb-2">
+                          <h4 className="font-medium">{category}</h4>
+                          <Badge variant="secondary">
+                            {Math.round(sentiment)}%
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {categorizedNews[category]?.length || 0} related articles
+                        </p>
+                      </div>
+                    ))}
                 </div>
-                <div className="border-b pb-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <h4 className="font-medium">Renewable Energy</h4>
-                    <Badge variant="secondary">+18%</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">Clean energy initiatives and policy changes are impacting the energy sector.</p>
-                </div>
-                <div className="pb-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <h4 className="font-medium">Cryptocurrency</h4>
-                    <Badge variant="secondary">+15%</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">Digital assets are gaining mainstream acceptance and regulatory clarity.</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Sector Performance Section */}
-            <div className="rounded-lg border bg-card p-6">
-              <h3 className="text-xl font-semibold mb-4">Sector Performance</h3>
-              <div className="space-y-4">
-                <div className="border-b pb-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <h4 className="font-medium">Technology</h4>
-                    <Badge variant="default">+2.5%</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">Leading market gains with strong AI and cloud computing performance.</p>
-                </div>
-                <div className="border-b pb-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <h4 className="font-medium">Healthcare</h4>
-                    <Badge variant="default">+3.1%</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">Benefiting from innovation and demographic trends.</p>
-                </div>
-                <div className="pb-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <h4 className="font-medium">Energy</h4>
-                    <Badge variant="destructive">-4.3%</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">Facing headwinds from shifting consumer preferences and policy changes.</p>
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 } 
