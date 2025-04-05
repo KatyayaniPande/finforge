@@ -14,7 +14,8 @@ import {
   Clock,
   FileText,
   MessageSquare,
-  Plus
+  Plus,
+  Lightbulb
 } from 'lucide-react';
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
@@ -84,6 +85,52 @@ const mockInvestorProfile = {
   averageInvestmentSize: 100000,
   portfolioDiversificationGoal: 'Increase exposure in AI/ML sector while maintaining balance in HealthTech'
 };
+
+// Add recommended startups based on portfolio goals
+const recommendedStartups = [
+  {
+    id: 1,
+    name: 'MetaBriefs',
+    industry: 'AI & Machine Learning',
+    stage: 'Seed',
+    currentValuation: '$18M',
+    description: 'AI system that aggregates internal company data to create personalized daily briefings for executives.',
+    matchReason: 'Aligns with goal to increase AI/ML exposure while maintaining strong fundamentals',
+    metrics: {
+      arr: '$300K',
+      growth: '30% QoQ',
+      marketSize: '$7.2B'
+    }
+  },
+  {
+    id: 2,
+    name: 'LoopHealth AI',
+    industry: 'HealthTech',
+    stage: 'Seed',
+    currentValuation: '$18M',
+    description: 'AI-powered diagnostic assistant that analyzes patient symptoms and medical history.',
+    matchReason: 'Maintains balanced exposure to HealthTech while incorporating AI capabilities',
+    metrics: {
+      arr: '$300K',
+      growth: '32% QoQ',
+      marketSize: '$9.2B'
+    }
+  },
+  {
+    id: 3,
+    name: 'Synthex Labs',
+    industry: 'BioTech',
+    stage: 'Seed',
+    currentValuation: '$25M',
+    description: 'Platform that uses deep learning to design novel molecular structures for drug discovery.',
+    matchReason: 'Combines HealthTech focus with cutting-edge AI applications',
+    metrics: {
+      arr: '$450K',
+      growth: '35% QoQ',
+      marketSize: '$12.8B'
+    }
+  }
+];
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -184,6 +231,10 @@ export default function DashboardPage() {
             <BarChart className="h-4 w-4" />
             Portfolio
           </TabsTrigger>
+          <TabsTrigger value="recommended" className="flex items-center gap-2">
+            <Lightbulb className="h-4 w-4" />
+            Recommended
+          </TabsTrigger>
           <TabsTrigger value="activity" className="flex items-center gap-2">
             <Clock className="h-4 w-4" />
             Activity
@@ -266,6 +317,71 @@ export default function DashboardPage() {
                   </Button>
                 </div>
                 <InvestmentsTable />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="recommended" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Recommended Investments</CardTitle>
+              <CardDescription>
+                Startups that align with your portfolio diversification goal: 
+                <span className="font-medium text-singlife-primary ml-1">
+                  {mockInvestorProfile.portfolioDiversificationGoal}
+                </span>
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {recommendedStartups.map((startup) => (
+                  <Card key={startup.id} className="bg-muted/50">
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-lg">{startup.name}</CardTitle>
+                          <CardDescription className="text-sm">
+                            {startup.industry} • {startup.stage} • Current Valuation: {startup.currentValuation}
+                          </CardDescription>
+                        </div>
+                        <Button variant="outline" className="bg-white">
+                          View Details
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <p className="text-sm text-gray-600">
+                          {startup.description}
+                        </p>
+                        
+                        <div className="grid grid-cols-3 gap-4 py-2">
+                          <div>
+                            <div className="text-sm font-medium">ARR</div>
+                            <div className="text-lg text-singlife-primary">{startup.metrics.arr}</div>
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium">Growth</div>
+                            <div className="text-lg text-green-600">{startup.metrics.growth}</div>
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium">Market Size</div>
+                            <div className="text-lg text-singlife-primary">{startup.metrics.marketSize}</div>
+                          </div>
+                        </div>
+
+                        <div className="bg-singlife-primary/5 p-3 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <Lightbulb className="h-4 w-4 text-singlife-primary" />
+                            <span className="text-sm font-medium text-singlife-primary">Why this matches your goals</span>
+                          </div>
+                          <p className="text-sm mt-1 text-gray-600">{startup.matchReason}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             </CardContent>
           </Card>
