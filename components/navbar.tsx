@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-<<<<<<< HEAD
 import { 
   Home, 
   FileText, 
@@ -16,13 +15,13 @@ import {
   User,
   Info,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  TrendingUp,
+  MessageSquare,
+  Newspaper
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useSidebar } from './sidebar-context';
-=======
-import { MessageSquare, LayoutDashboard, Newspaper, FileText, Info, TrendingUp } from 'lucide-react';
->>>>>>> 6d03fd754a91e604042336c2158d197c639bd575
 
 export function Navbar() {
   const pathname = usePathname();
@@ -37,7 +36,9 @@ export function Navbar() {
     >
       <div className="p-2">
         <div className="flex items-center justify-between mb-4">
-          {!isCollapsed && <h1 className="text-xl font-bold text-singlife-primary">FinForge</h1>}
+          {!isCollapsed && (
+            <h1 className="text-xl font-bold text-singlife-primary">Singlife</h1>
+          )}
           <Button
             variant="ghost"
             size="icon"
@@ -63,18 +64,52 @@ export function Navbar() {
               {!isCollapsed && "Dashboard"}
             </Button>
           </Link>
-<<<<<<< HEAD
 
-=======
-          <Link href="/investments">
+          <Link href="/chat">
             <Button
-              className={`flex items-center gap-2 ${getButtonClass('investments')}`}
+              variant="ghost"
+              size="sm"
+              className={cn(
+                'w-full justify-start gap-2 h-9',
+                pathname === '/chat' && 'bg-singlife-light text-singlife-primary',
+                isCollapsed && 'justify-center'
+              )}
             >
-              <TrendingUp className="h-4 w-4" />
-              Investments
+              <MessageSquare className="h-4 w-4" />
+              {!isCollapsed && "Chat"}
             </Button>
           </Link>
->>>>>>> 6d03fd754a91e604042336c2158d197c639bd575
+
+          <Link href="/investments">
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(
+                'w-full justify-start gap-2 h-9',
+                pathname === '/investments' && 'bg-singlife-light text-singlife-primary',
+                isCollapsed && 'justify-center'
+              )}
+            >
+              <TrendingUp className="h-4 w-4" />
+              {!isCollapsed && "Investments"}
+            </Button>
+          </Link>
+
+          <Link href="/news">
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(
+                'w-full justify-start gap-2 h-9',
+                pathname === '/news' && 'bg-singlife-light text-singlife-primary',
+                isCollapsed && 'justify-center'
+              )}
+            >
+              <Newspaper className="h-4 w-4" />
+              {!isCollapsed && "News"}
+            </Button>
+          </Link>
+
           <Link href="/due-diligence">
             <Button
               variant="ghost"
