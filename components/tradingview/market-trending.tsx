@@ -69,5 +69,5 @@ export function MarketTrending({}) {
     </div>
   )
 }
-
 export default memo(MarketTrending)
+
