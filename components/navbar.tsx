@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { 
@@ -12,25 +12,46 @@ import {
   Info,
   ChevronLeft,
   ChevronRight,
-  TrendingUp,
   MessageSquare,
-  Newspaper
+  Newspaper,
+  Building2,
+  TrendingUp,
+  User
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useSidebar } from './sidebar-context';
+import { useAuth } from '@/lib/auth-context';
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { isCollapsed, toggleSidebar } = useSidebar();
+  const { user, logout } = useAuth();
 
-  const menuItems = [
-    { href: "/", icon: Home, label: "Dashboard" },
+  const isInvestor = user?.role === 'investor';
+  const isStartup = user?.role === 'startup';
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/login');
+  };
+
+  const investorMenuItems = [
+    { href: "/dashboard", icon: Home, label: "Dashboard" },
     { href: "/chat", icon: MessageSquare, label: "Chat" },
     { href: "/investments", icon: TrendingUp, label: "Investments" },
     { href: "/news", icon: Newspaper, label: "News" },
     { href: "/due-diligence", icon: FileText, label: "Due Diligence" },
     { href: "/about", icon: Info, label: "About" },
   ];
+
+  const startupMenuItems = [
+    { href: "/dashboard", icon: Home, label: "Dashboard" },
+    { href: "/startups/edit/profile", icon: User, label: "My Profile" },
+    { href: "/about", icon: Info, label: "About" },
+  ];
+
+  const menuItems = isInvestor ? investorMenuItems : startupMenuItems;
 
   return (
     <div 
@@ -42,7 +63,7 @@ export function Navbar() {
       <div className="p-2">
         <div className="flex items-center justify-between mb-4">
           {!isCollapsed && (
-            <h1 className="text-xl font-bold text-singlife-primary">Singlife</h1>
+            <h1 className="text-xl font-bold text-singlife-primary">FinForge</h1>
           )}
           <Button
             variant="ghost"
@@ -80,12 +101,12 @@ export function Navbar() {
         <div className={cn("flex items-center gap-2 mb-2", isCollapsed && "justify-center")}>
           <Avatar className="h-8 w-8">
             <AvatarImage src="/avatar-placeholder.png" />
-            <AvatarFallback>JD</AvatarFallback>
+            <AvatarFallback>{user?.name?.slice(0, 2) || 'U'}</AvatarFallback>
           </Avatar>
           {!isCollapsed && (
             <div>
-              <p className="font-medium text-sm text-singlife-secondary">John Doe</p>
-              <p className="text-xs text-gray-500">Admin</p>
+              <p className="font-medium text-sm text-singlife-secondary">{user?.name || 'User'}</p>
+              <p className="text-xs text-gray-500 capitalize">{user?.role || 'Guest'}</p>
             </div>
           )}
         </div>
@@ -107,6 +128,7 @@ export function Navbar() {
               "w-full justify-start gap-2 h-9 text-red-500 hover:text-red-600",
               isCollapsed && "justify-center"
             )}
+            onClick={handleLogout}
           >
             <LogOut className="h-4 w-4" />
             {!isCollapsed && "Logout"}

@@ -3,10 +3,7 @@ import { GeistMono } from 'geist/font/mono'
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css"
-import { MainLayout } from "@/components/layout/main-layout"
-import { SidebarProvider } from "@/components/sidebar-context"
-import { Toaster } from "@/components/ui/sonner"
-import { TooltipProvider } from "@/components/ui/tooltip"
+import { ClientLayout } from './client-layout';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -37,18 +34,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={inter.className}
-      >
-        <TooltipProvider>
-          <SidebarProvider>
-            <MainLayout>
-              {children}
-            </MainLayout>
-            <Toaster position="top-center" />
-          </SidebarProvider>
-        </TooltipProvider>
+      <body className={inter.className}>
+        <ClientLayout>
+          {children}
+        </ClientLayout>
       </body>
     </html>
-  )
+  );
 }
