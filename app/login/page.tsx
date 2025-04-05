@@ -53,7 +53,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md shadow-lg border-0">
         <CardHeader className="space-y-1 bg-gradient-to-r from-singlife-primary/5 to-singlife-primary/10 rounded-t-lg">
-          <CardTitle className="text-2xl font-bold text-center text-singlife-primary">FinForge</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center text-singlife-primary">SingVentures</CardTitle>
           <CardDescription className="text-center text-singlife-secondary">
             Enter your credentials to access your account
           </CardDescription>

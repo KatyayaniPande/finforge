@@ -1,5 +1,5 @@
 def main():
-    print("Hello from finforge!")
+    print("Hello from SingVentures!")
 
 
 if __name__ == "__main__":

@@ -40,7 +40,7 @@ export function Navbar() {
   const investorMenuItems = [
     { href: "/dashboard", icon: Home, label: "Dashboard" },
     { href: "/chat", icon: MessageSquare, label: "Chat" },
-    { href: "/investments", icon: TrendingUp, label: "Investments" },
+    { href: "/investments", icon: TrendingUp, label: "Marketplace" },
     { href: "/news", icon: Newspaper, label: "News" },
     { href: "/due-diligence", icon: FileText, label: "Due Diligence" },
     { href: "/about", icon: Info, label: "About" },
@@ -48,8 +48,8 @@ export function Navbar() {
 
   const startupMenuItems = [
     { href: "/dashboard", icon: Home, label: "Dashboard" },
-    { href: "/startups/edit/profile", icon: User, label: "My Profile" },
     { href: "/startups/requests", icon: Bell, label: "Requests" },
+    { href: "/startups/edit/profile", icon: User, label: "Update Details" },
     { href: "/about", icon: Info, label: "About" },
   ];
 
@@ -65,7 +65,7 @@ export function Navbar() {
       <div className="p-2">
         <div className="flex items-center justify-between mb-4">
           {!isCollapsed && (
-            <h1 className="text-xl font-bold text-singlife-primary">FinForge</h1>
+            <h1 className="text-xl font-bold text-singlife-primary">SingVentures</h1>
           )}
           <Button
             variant="ghost"

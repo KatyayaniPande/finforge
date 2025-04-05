@@ -304,7 +304,7 @@ export default function RegisterPage() {
         {/* Right side - Features & Benefits */}
         <div className="hidden lg:flex flex-col justify-center space-y-8">
           <div className="space-y-4">
-            <h2 className="text-3xl font-bold text-singlife-primary">Why Join FinForge?</h2>
+            <h2 className="text-3xl font-bold text-singlife-primary">Why Join SingVentures?</h2>
             <p className="text-lg text-gray-600">
               Connect with a network of innovative startups and visionary investors
             </p>

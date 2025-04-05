@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   metadataBase: process.env.VERCEL_URL
     ? new URL(`https://${process.env.VERCEL_URL}`)
     : undefined,
-  title: "FinForge - Investment Platform",
+  title: "SingVentures - Investment Platform",
   description: "AI-powered investment platform for startups and investors",
   icons: {
     icon: '/favicon.ico',
