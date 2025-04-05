@@ -1,62 +1,108 @@
-# FinForge - Investment Due Diligence Platform
+# SingVentures - AI-Powered Startup Platform
+[![LangGraph](https://img.shields.io/badge/LangGraph-FF5700?style=for-the-badge&logo=chainlink&logoColor=white)](https://github.com/langchain-ai/langgraph)
+[![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white)](https://openai.com/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
 
-FinForge is a comprehensive investment due diligence platform that combines AI-powered document analysis with security scanning to help investors make informed decisions. The platform provides detailed analysis of investment documents, identifies potential risks, and offers actionable insights.
+
+## Overview
+SingVentures is a smart, AI-powered investment platform that helps emerging and growth-stage investors discover, analyze, and manage startup investments with confidence and clarity. Our platform bridges the gap between promising startups and strategic investors through intelligent analytics and streamlined due diligence.
+
 
 ## Features
 
-### 1. Document Analysis
-- **AI-Powered Analysis**: Utilizes advanced AI models to analyze investment documents
-- **Comprehensive Reports**: Generates detailed reports covering:
-  - Market Analysis
-  - Financial Metrics
-  - Risk Assessment
-  - Investment Recommendations
-  - Key Performance Indicators
+### 1. Personalized Investor Dashboard
+- **Portfolio Visualization**: Real-time portfolio value, monthly and quarterly returns
+- **Sector Allocation**: Visual breakdown of investments across industries
+- **Custom Analytics**: Tailored metrics based on your strategy and risk tolerance
+- **Performance Tracking**: Historical performance with benchmark comparisons
 
-### 2. Security Analysis (DAST)
-- **Document Security Scanning**: Analyzes documents for potential security risks
-- **Vulnerability Detection**: Identifies:
-  - Sensitive Data Exposure
-  - Information Disclosure
-  - Metadata Leakage
-- **Risk Assessment**: Provides severity ratings and recommendations
-- **Real-time Scanning**: Immediate feedback on uploaded documents
+### 2. AI-Powered Due Diligence Engine
+- **Multi-Agent Workflow**: LangGraph-powered specialized agents for comprehensive analysis
+- **Intelligent Document Analysis**: Processes financial reports, founder agreements, and term sheets
+- **Document Support**: Handles PDF, DOCX, images, and more through OCR capabilities
+- **Risk Identification**: Automatically flags compliance issues and potential risks
+- **Key Metric Extraction**: Pulls critical data points from complex documents
 
-### 3. User Interface
-- **Modern Dashboard**: Clean and intuitive interface
-- **Real-time Progress**: Live progress tracking during analysis
-- **Interactive Results**: Easy-to-navigate analysis results
-- **Raw Data Access**: Option to view detailed JSON output
+### 3. Startup Marketplace
+- **Curated Listings**: Focused on post-seed and growth-stage opportunities
+- **Dynamic Metrics**: Real-time ARR, TAM, growth rates, and burn rates
+- **Team Assessment**: Founder and key executive background analysis
+- **Investment Matching**: AI-powered recommendations based on your portfolio strategy
+- **Direct Connection**: Streamlined communication with promising startups
+
+### 4. Market Intelligence
+- **News & Market Sentiment**: Real-time analysis of financial news
+- **Sector-Specific Insights**: NLP-generated sentiment scores by industry
+- **Trend Identification**: Early detection of market shifts and opportunities
+- **Competitive Landscape**: Analysis of startup positioning within markets
+
+## Contributors
+* [Alyssa Wong](https://github.com/alyssahx-wong)
+* [Jden Goh](https://github.com/jdengoh)
+* [Jovan Foo](https://github.com/JoeSJF)
+* [Pande Katyayani](https://github.com/KatyayaniPande)
+
 
 ## Getting Started
 
-### Prerequisites
+
+## Prerequisites
 - Node.js (v16 or higher)
+- Python 3.9+
 - npm or yarn
-- SQLite3
+
 
 ### Installation
 
 1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/finforge.git
-cd finforge
-```
 
-2. Install dependencies:
+2. Install npm dependencies:
 ```bash
-npm install
+pnpm install
 # or
 yarn install
 ```
 
-3. Install required packages:
+3. Install Python dependencies
+
+Create your virtual env:
+
 ```bash
-npm install uuid @types/uuid
+uv venv
+```
+
+Activate your virtual env
+
+**Linux / MacOS:**
+
+```bash
+source .venv/bin/activate
+```
+
+**Windows:**
+
+```powershell
+.venv/Scripts/activate
+```
+
+Install the dependencies:
+
+```python
+uv sync
 ```
 
 4. Set up environment variables:
 Create a `.env.local` file in the root directory:
+```env
+GROQ_API_KEY=your_api_key_here
+NEXT_PUBLIC_NEWS_API_KEY=your_api_key_here
+```
+
+Create a `.env` file in root directory as well
 ```env
 OPENAI_API_KEY=your_api_key_here
 ```
@@ -68,14 +114,44 @@ npm run db:setup
 
 ### Running the Application
 
+#### Quick Start (Recommended)
+
+For convenience, you can use our startup scripts:
+
+**On Linux/Mac:**
+```bash
+./scripts/start.sh
+```
+
+**On Windows:**
+```powershell
+.\scripts\start.ps1
+```
+
+
 1. Start the development server:
 ```bash
 npm run dev
 # or
 yarn dev
 ```
+2. Start the agentic AI server
+```bash
+uvicorn agentApp.main:app --reload
+```
 
-2. Open [http://localhost:3000](http://localhost:3000) in your browser
+3. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+---
+
+## Technology Stack
+
+- **Frontend**: Next.js and TailwindCSS with Recharts for data visualization
+- **Backend**: FastAPI for high-performance API endpoints
+- **AI Engine**: LangChain and transformer-based models for document analysis
+- **OCR Processing**: Tesseract for document scanning and text extraction
+- **Database**: SQLite for efficient data storage and retrieval
+- **Authentication**: JWT implementation for secure identity management
 
 ## Project Structure
 
@@ -99,83 +175,13 @@ finforge/
 ### Document Analysis API
 - **Endpoint**: `/api/analyze`
 - **Method**: POST
-- **Body**: FormData with file
 - **Response**: Analysis results including market insights and recommendations
 
-### DAST Security Analysis API
-- **Endpoint**: `/api/dast-analysis`
+### Startup Personalised Insights API
+- **Endpoint**: `/api/analyze-startup`
 - **Method**: POST
-- **Body**: FormData with file
-- **Response**: Security analysis results including vulnerabilities and risk levels
+- **Response**: Startup assessment based on personal portfolio, including market analysis, financial analysis and risk assessment
 
-## Security Features
-
-- File type validation
-- File size limits (10MB max)
-- Secure file handling
-- Vulnerability scanning
-- Metadata analysis
-- Sensitive data detection
-
-## Development
-
-### Adding New Features
-
-1. Create a new branch:
-```bash
-git checkout -b feature/your-feature-name
-```
-
-2. Make your changes and commit:
-```bash
-git add .
-git commit -m "Add your feature"
-```
-
-3. Push to your branch:
-```bash
-git push origin feature/your-feature-name
-```
-
-### Running Tests
-```bash
-npm run test
-# or
-yarn test
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## Error Handling
-
-The platform includes comprehensive error handling:
-- File validation errors
-- Analysis engine errors
-- API errors
-- Database errors
-
-Each error includes:
-- Error code
-- Descriptive message
-- Stack trace (in development)
-- Suggested resolution
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Support
-
-For support, please:
-1. Check the documentation
-2. Search existing issues
-3. Create a new issue if needed
 
 ## Roadmap
 
