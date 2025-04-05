@@ -7,7 +7,7 @@ export async function refreshHistory(path: string) {
 }
 
 export async function getMissingKeys() {
-  const requiredKeys = ['OPENAI_API_KEY']
+  const requiredKeys = ['GROQ_API_KEY']
   const missingKeys = requiredKeys.filter(key => !process.env[key])
   return missingKeys
 }

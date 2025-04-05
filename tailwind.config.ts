@@ -1,5 +1,7 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+import type { Config } from 'tailwindcss'
+
+const config: Config = {
   darkMode: ['class'],
   content: [
     './pages/**/*.{ts,tsx}',
@@ -22,21 +24,32 @@ module.exports = {
         mono: ['var(--font-geist-mono)']
       },
       colors: {
+        // Singlife brand colors - Red theme
+        'singlife-primary': '#F55036', // Primary red
+        'singlife-primary-dark': '#D43A20', // Darker red for hover states
+        'singlife-secondary': '#2C3E50', // Dark blue-gray for secondary text
+        'singlife-light': '#FFFFFF', // White background
+        'singlife-accent': '#FF6B6B', // Accent red
+        'singlife-success': '#2ECC71', // Success green
+        'singlife-warning': '#F1C40F', // Warning yellow
+        'singlife-danger': '#E74C3C', // Danger red
+        
+        // Existing theme colors with Singlife overrides
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         primary: {
-          DEFAULT: 'hsl(var(--primary))',
+          DEFAULT: 'var(--singlife-primary)',
           foreground: 'hsl(var(--primary-foreground))'
         },
         secondary: {
-          DEFAULT: 'hsl(var(--secondary))',
+          DEFAULT: 'var(--singlife-secondary)',
           foreground: 'hsl(var(--secondary-foreground))'
         },
         destructive: {
-          DEFAULT: 'hsl(var(--destructive))',
+          DEFAULT: 'var(--singlife-danger)',
           foreground: 'hsl(var(--destructive-foreground))'
         },
         muted: {
@@ -44,7 +57,7 @@ module.exports = {
           foreground: 'hsl(var(--muted-foreground))'
         },
         accent: {
-          DEFAULT: 'hsl(var(--accent))',
+          DEFAULT: 'var(--singlife-accent)',
           foreground: 'hsl(var(--accent-foreground))'
         },
         popover: {
@@ -79,3 +92,5 @@ module.exports = {
   },
   plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')]
 }
+
+export default config
