@@ -1,101 +1,198 @@
 "use client"
 
-import { useParams } from "next/navigation"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
+import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Slider } from "@/components/ui/slider"
 import { 
-  Globe, 
   MapPin, 
   Users2, 
-  Calendar, 
-  DollarSign, 
-  TrendingUp, 
+  Star,
+  Shield,
+  ArrowLeft,
+  TrendingUp,
   Building2,
+  Globe,
   ExternalLink,
-  Plus,
-  Mail,
-  Phone,
-  FileText
+  DollarSign,
+  Calendar,
+  ChevronUp,
+  ChevronDown
 } from "lucide-react"
+import Link from "next/link"
+import { useParams } from "next/navigation"
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Area,
+  AreaChart
+} from "recharts"
+import { cn } from "@/lib/utils"
 
-// This would come from your API/database in a real app
-const startupDetails = {
-  id: 1,
-  name: "NeuralKey",
-  stage: "Series A",
-  logo: "/placeholder.png",
-  description: "Enterprise-grade AI security platform with advanced threat detection and real-time monitoring for organizations of all sizes.",
-  tags: ["AI", "Cybersecurity", "Enterprise", "Machine Learning", "B2B", "SaaS"],
-  website: "https://neuralkey.ai",
-  location: "San Francisco, CA",
-  founded: "2022",
-  teamSize: "28 employees",
-  valuation: "$15M",
-  growth: "+63%",
-  traction: "42 Enterprises",
-  overview: "NeuralKey is revolutionizing cybersecurity with an AI-powered platform that provides real-time threat detection and automated response capabilities. Our proprietary neural network architecture can identify zero-day threats and sophisticated attacks that traditional security solutions miss. By combining machine learning with expert security knowledge, we help enterprises protect their most sensitive data from increasingly complex cyber threats.",
-  team: [
+// Sample data
+const startups = {
+  featured: [
     {
-      name: "Alexandra Chen",
-      role: "CEO & Co-founder",
-      image: "/placeholder.png",
-      bio: "Former Head of Security at CloudSecure with 12+ years of experience in cybersecurity and AI."
-    },
-    {
-      name: "Marcus Johnson",
-      role: "CTO & Co-founder",
-      image: "/placeholder.png",
-      bio: "PhD in Machine Learning, previously led AI research at Google's security division."
-    },
-    {
-      name: "Olivia Rodriguez",
-      role: "COO",
-      image: "/placeholder.png",
-      bio: "15+ years of operational experience in enterprise SaaS companies."
+      id: 1,
+      name: "NeuralKey",
+      stage: "Series A",
+      location: "San Francisco, CA",
+      website: "https://neuralkey.ai",
+      founded: "2022",
+      description: "Enterprise-grade AI security platform with advanced threat detection and real-time monitoring for organizations of all sizes.",
+      fundingCurrent: 1200000,
+      fundingTarget: 2000000,
+      daysLeft: 28,
+      tags: ["AI", "Cybersecurity", "Enterprise"],
+      teamSize: 28,
+      rating: 4.8,
+      icon: Shield,
+      valuation: "15M",
+      growth: "+63%",
+      traction: "42 Enterprises",
+      minimumInvestment: 50000,
+      equityOffered: "4-8%",
+      closingDate: "October 30, 2025",
+      // Risk Analysis Data
+      portfolioValue: "25.0M",
+      riskScore: "72/100",
+      monthlyReturn: "+2.1%",
+      avgHoldPeriod: "3.2 yrs",
+      riskMetrics: {
+        startupRiskScore: "65/100",
+        marketRisk: "58/100",
+        financialHealth: "82/100",
+        exitPotential: "75/100"
+      },
+      keyMetrics: {
+        monthlyRevenue: "420K",
+        revenueGrowth: "+28%",
+        ltvCacRatio: "3.2x",
+        burnRate: "850K/month",
+        runway: "18 months",
+        marketSize: "$15B",
+        retention: "92%",
+        churnRate: "0.8%",
+        competitors: 8
+      },
+      businessMetrics: {
+        revenue: {
+          current: 420000,
+          growth: 28,
+          trend: "up"
+        },
+        ltv: {
+          value: 125000,
+          trend: "up"
+        },
+        cac: {
+          value: 39000,
+          trend: "down"
+        },
+        retention: {
+          monthly: 92,
+          trend: "up"
+        },
+        market: {
+          tam: 15000000000,
+          penetration: 0.8,
+          trend: "up"
+        }
+      },
+      simulationParams: {
+        marketGrowthRate: {
+          min: 10,
+          max: 50,
+          current: 25
+        },
+        competitorImpact: {
+          min: 10,
+          max: 70,
+          current: 40
+        },
+        monthlyBurnRate: {
+          min: 500000,
+          max: 2000000,
+          current: 850000
+        },
+        initialInvestment: {
+          min: 1000000,
+          max: 10000000,
+          current: 5000000
+        }
+      },
+      aiAnalysis: {
+        recommendation: "High-Risk Investment",
+        confidence: "40%",
+        keyPoints: [
+          "Significant market challenges",
+          "Financial metrics need improvement",
+          "High competition in the space"
+        ],
+        opportunities: [
+          "Large addressable market"
+        ],
+        risks: [
+          "Highly competitive market",
+          "High burn rate requires careful monitoring",
+          "Limited runway requires immediate action"
+        ]
+      }
     }
-  ],
-  investment: {
-    current: 1200000,
-    target: 2000000,
-    minimum: 50000,
-    equity: "4-8%",
-    closingDate: "October 30, 2025",
-    documents: [
-      { name: "Pitch Deck", url: "#" },
-      { name: "Financial Projections", url: "#" },
-      { name: "Technical Documentation", url: "#" }
-    ]
-  },
-  contact: {
-    email: "investors@neuralkey.ai",
-    phone: "(415) 555-0123"
-  }
+  ]
 }
+
+type SimulationParamKey = 'marketGrowthRate' | 'competitorImpact' | 'monthlyBurnRate' | 'initialInvestment'
 
 export default function StartupDetailsPage() {
   const params = useParams()
+  const startupId = parseInt(params.id as string)
+  const [activeTab, setActiveTab] = useState("overview")
+
+  // Find the startup by ID
+  const startup = startups.featured.find(s => s.id === startupId)
+  if (!startup) return <div>Startup not found</div>
+
+  const Icon = startup.icon
+  const progress = (startup.fundingCurrent / startup.fundingTarget) * 100
+  const formattedCurrent = (startup.fundingCurrent / 1000000).toFixed(1)
+  const formattedTarget = (startup.fundingTarget / 1000000).toFixed(1)
 
   return (
     <div className="container mx-auto p-6">
+      <div className="mb-6">
+        <Link href="/investments">
+          <Button variant="ghost" className="mb-4">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Investments
+          </Button>
+        </Link>
+      </div>
+
       {/* Header */}
       <div className="flex items-start justify-between mb-8">
         <div className="flex items-start gap-6">
           <div className="w-24 h-24 bg-singlife-light rounded-lg flex items-center justify-center">
-            <Building2 className="h-12 w-12 text-singlife-primary" />
+            <Icon className="h-12 w-12 text-singlife-primary" />
           </div>
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl font-bold">{startupDetails.name}</h1>
-              <Badge variant="outline" className="text-base">{startupDetails.stage}</Badge>
+              <h1 className="text-3xl font-bold">{startup.name}</h1>
+              <Badge variant="outline" className="text-base">{startup.stage}</Badge>
             </div>
             <p className="text-lg text-gray-600 mb-4 max-w-3xl">
-              {startupDetails.description}
+              {startup.description}
             </p>
             <div className="flex flex-wrap gap-2">
-              {startupDetails.tags.map((tag) => (
+              {startup.tags.map((tag) => (
                 <Badge key={tag} variant="secondary">{tag}</Badge>
               ))}
             </div>
@@ -107,103 +204,296 @@ export default function StartupDetailsPage() {
             <span>Visit Website</span>
             <ExternalLink className="h-4 w-4" />
           </Button>
-          <Button className="flex items-center gap-2">
-            <Plus className="h-4 w-4" />
-            Add to Watchlist
-          </Button>
           <Button className="bg-singlife-primary hover:bg-singlife-primary/90">
-            Contact Startup
+            Contact Team
           </Button>
         </div>
       </div>
 
+      {/* Main Content */}
       <div className="grid grid-cols-3 gap-8">
+        {/* Left Content */}
         <div className="col-span-2">
           <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList>
-              <TabsTrigger value="overview">Company Overview</TabsTrigger>
-              <TabsTrigger value="team">Team</TabsTrigger>
-              <TabsTrigger value="financials">Financials</TabsTrigger>
-              <TabsTrigger value="market">Market</TabsTrigger>
+            <TabsList className="w-full">
+              <TabsTrigger value="overview" className="flex-1">Company Overview</TabsTrigger>
+              <TabsTrigger value="risk-analysis" className="flex-1">Risk Analysis</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="overview" className="space-y-6">
+            <TabsContent value="overview">
               {/* Key Metrics */}
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-4 gap-4 mb-6">
                 <Card className="p-4">
                   <DollarSign className="h-5 w-5 text-gray-500 mb-2" />
                   <div className="text-sm text-gray-500">Valuation</div>
-                  <div className="text-xl font-bold">{startupDetails.valuation}</div>
+                  <div className="text-xl font-bold">${startup.valuation}</div>
                 </Card>
                 <Card className="p-4">
                   <TrendingUp className="h-5 w-5 text-gray-500 mb-2" />
                   <div className="text-sm text-gray-500">Growth</div>
-                  <div className="text-xl font-bold">{startupDetails.growth}</div>
+                  <div className="text-xl font-bold">{startup.growth}</div>
                 </Card>
                 <Card className="p-4">
                   <Users2 className="h-5 w-5 text-gray-500 mb-2" />
                   <div className="text-sm text-gray-500">Team Size</div>
-                  <div className="text-xl font-bold">{startupDetails.teamSize}</div>
+                  <div className="text-xl font-bold">{startup.teamSize} employees</div>
                 </Card>
                 <Card className="p-4">
                   <Building2 className="h-5 w-5 text-gray-500 mb-2" />
                   <div className="text-sm text-gray-500">Traction</div>
-                  <div className="text-xl font-bold">{startupDetails.traction}</div>
+                  <div className="text-xl font-bold">{startup.traction}</div>
                 </Card>
               </div>
 
-              {/* Company Description */}
-              <Card className="p-6">
-                <h2 className="text-xl font-semibold mb-4">About {startupDetails.name}</h2>
-                <p className="text-gray-600 mb-6">{startupDetails.overview}</p>
+              {/* Company Info */}
+              <Card className="p-6 mb-6">
+                <h2 className="text-xl font-semibold mb-4">About {startup.name}</h2>
+                <p className="text-gray-600 mb-6">{startup.description}</p>
                 
                 <div className="grid grid-cols-2 gap-6">
                   <div>
                     <div className="flex items-center gap-2 text-gray-600 mb-3">
                       <Globe className="h-4 w-4" />
-                      <a href={startupDetails.website} className="text-singlife-primary hover:underline">
-                        {startupDetails.website}
+                      <a href={startup.website} className="text-singlife-primary hover:underline">
+                        {startup.website}
                       </a>
                     </div>
                     <div className="flex items-center gap-2 text-gray-600">
                       <MapPin className="h-4 w-4" />
-                      {startupDetails.location}
+                      {startup.location}
                     </div>
                   </div>
                   <div>
                     <div className="flex items-center gap-2 text-gray-600 mb-3">
                       <Calendar className="h-4 w-4" />
-                      Founded {startupDetails.founded}
+                      Founded {startup.founded}
                     </div>
                     <div className="flex items-center gap-2 text-gray-600">
                       <Users2 className="h-4 w-4" />
-                      {startupDetails.teamSize}
+                      {startup.teamSize} employees
                     </div>
                   </div>
                 </div>
               </Card>
             </TabsContent>
 
-            <TabsContent value="team" className="space-y-6">
-              <Card className="p-6">
-                <h2 className="text-xl font-semibold mb-6">Leadership Team</h2>
-                <div className="space-y-6">
-                  {startupDetails.team.map((member) => (
-                    <div key={member.name} className="flex items-start gap-4">
-                      <div className="w-16 h-16 bg-gray-100 rounded-full" />
-                      <div>
-                        <h3 className="font-semibold">{member.name}</h3>
-                        <div className="text-sm text-gray-500 mb-2">{member.role}</div>
-                        <p className="text-gray-600">{member.bio}</p>
-                      </div>
-                    </div>
-                  ))}
+            <TabsContent value="risk-analysis">
+              <Card className="p-6 mb-6">
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <h3 className="text-lg font-semibold">Risk Analysis</h3>
+                    <p className="text-sm text-gray-500">AI-powered investment risk assessment</p>
+                  </div>
+                  <Badge variant="outline" className="bg-blue-50">AI Analysis</Badge>
+                </div>
+
+                {/* AI Analysis Content */}
+                <div className="grid grid-cols-2 gap-6 mt-6">
+                  <div>
+                    <h4 className="font-medium mb-3">Key Investment Points</h4>
+                    <ul className="space-y-2">
+                      {startup.aiAnalysis.keyPoints.map((point, index) => (
+                        <li key={index} className="flex items-center gap-2 text-gray-600">
+                          <div className="h-2 w-2 rounded-full bg-singlife-primary" />
+                          {point}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-medium mb-3">Opportunities</h4>
+                    <ul className="space-y-2">
+                      {startup.aiAnalysis.opportunities.map((opportunity, index) => (
+                        <li key={index} className="flex items-center gap-2 text-gray-600">
+                          <ChevronUp className="h-4 w-4 text-green-500" />
+                          {opportunity}
+                        </li>
+                      ))}
+                    </ul>
+                    <h4 className="font-medium mb-3 mt-6">Risks to Consider</h4>
+                    <ul className="space-y-2">
+                      {startup.aiAnalysis.risks.map((risk, index) => (
+                        <li key={index} className="flex items-center gap-2 text-gray-600">
+                          <ChevronDown className="h-4 w-4 text-red-500" />
+                          {risk}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               </Card>
+
+              {/* Portfolio Overview */}
+              <Card className="p-6 mb-6">
+                <h2 className="text-xl font-semibold mb-4">Portfolio Overview</h2>
+                <div className="grid grid-cols-4 gap-4">
+                  <div>
+                    <div className="text-sm text-gray-500">Portfolio Value</div>
+                    <div className="text-xl font-bold">${startup.portfolioValue}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-500">Risk Score</div>
+                    <div className="text-xl font-bold">{startup.riskScore}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-500">Monthly Return</div>
+                    <div className="text-xl font-bold text-green-500">{startup.monthlyReturn}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-500">Avg. Hold Period</div>
+                    <div className="text-xl font-bold">{startup.avgHoldPeriod}</div>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Risk Metrics */}
+              <div className="grid grid-cols-2 gap-6 mb-6">
+                <Card className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Risk Metrics</h3>
+                  <div className="space-y-4">
+                    {Object.entries(startup.riskMetrics).map(([key, value]) => (
+                      <div key={key} className="flex justify-between items-center">
+                        <span className="text-gray-600">
+                          {key.replace(/([A-Z])/g, ' $1').split(' ').map(word => 
+                            word.charAt(0).toUpperCase() + word.slice(1)
+                          ).join(' ')}
+                        </span>
+                        <span className="font-semibold">{value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+
+                <Card className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Key Metrics</h3>
+                  <div className="space-y-4">
+                    {Object.entries(startup.keyMetrics).map(([key, value]) => (
+                      <div key={key} className="flex justify-between items-center">
+                        <span className="text-gray-600">
+                          {key.replace(/([A-Z])/g, ' $1').split(' ').map(word => 
+                            word.charAt(0).toUpperCase() + word.slice(1)
+                          ).join(' ')}
+                        </span>
+                        <span className="font-semibold">{value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              </div>
+
+              {/* Business Metrics */}
+              <div className="grid grid-cols-3 gap-6 mb-6">
+                {/* Revenue Metrics */}
+                <Card className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Revenue Metrics</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-gray-600">Monthly Revenue</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold">${startup.keyMetrics.monthlyRevenue}</span>
+                          <Badge variant="outline" className={cn(
+                            "text-xs",
+                            startup.businessMetrics.revenue.trend === "up" ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"
+                          )}>
+                            {startup.keyMetrics.revenueGrowth}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="h-1 bg-gray-100 rounded">
+                        <div 
+                          className="h-1 bg-green-500 rounded" 
+                          style={{ width: `${Math.min(startup.businessMetrics.revenue.growth, 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div className="pt-4 border-t">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-600">LTV/CAC Ratio</span>
+                        <span className="font-semibold">{startup.keyMetrics.ltvCacRatio}</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div className="bg-gray-50 p-2 rounded">
+                          <div className="text-gray-500">LTV</div>
+                          <div className="font-medium">${(startup.businessMetrics.ltv.value / 1000).toFixed(1)}k</div>
+                        </div>
+                        <div className="bg-gray-50 p-2 rounded">
+                          <div className="text-gray-500">CAC</div>
+                          <div className="font-medium">${(startup.businessMetrics.cac.value / 1000).toFixed(1)}k</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Customer Metrics */}
+                <Card className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Customer Metrics</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-gray-600">Monthly Retention</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold">{startup.keyMetrics.retention}</span>
+                          <Badge variant="outline" className="bg-green-50 text-green-700 text-xs">
+                            Strong
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="h-1 bg-gray-100 rounded">
+                        <div 
+                          className="h-1 bg-green-500 rounded" 
+                          style={{ width: `${startup.businessMetrics.retention.monthly}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div className="pt-4 border-t">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-600">Monthly Churn</span>
+                        <span className="font-semibold">{startup.keyMetrics.churnRate}</span>
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        Industry average: 3.2%
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Market Metrics */}
+                <Card className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Market Metrics</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-gray-600">Total Market Size</span>
+                        <span className="font-semibold">{startup.keyMetrics.marketSize}</span>
+                      </div>
+                      <div className="text-sm text-gray-500 mb-4">
+                        Current market penetration: {startup.businessMetrics.market.penetration}%
+                      </div>
+                    </div>
+                    <div className="pt-4 border-t">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-600">Runway</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold">{startup.keyMetrics.runway}</span>
+                          <Badge variant={startup.keyMetrics.runway.includes("18") ? "outline" : "destructive"} className="text-xs">
+                            {parseInt(startup.keyMetrics.runway) <= 12 ? "Critical" : "Healthy"}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        Burn rate: {startup.keyMetrics.burnRate}
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </div>
             </TabsContent>
           </Tabs>
         </div>
 
+        {/* Right Sidebar */}
         <div className="space-y-6">
           {/* Investment Opportunity */}
           <Card className="p-6">
@@ -214,11 +504,11 @@ export default function StartupDetailsPage() {
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-600">Funding Progress</span>
                   <span className="font-medium">
-                    ${startupDetails.investment.current.toLocaleString()} of ${startupDetails.investment.target.toLocaleString()}
+                    ${formattedCurrent}M of ${formattedTarget}M
                   </span>
                 </div>
                 <Progress 
-                  value={(startupDetails.investment.current / startupDetails.investment.target) * 100} 
+                  value={progress} 
                   className="h-2"
                 />
               </div>
@@ -226,15 +516,15 @@ export default function StartupDetailsPage() {
               <div className="space-y-4">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Minimum Investment</span>
-                  <span className="font-medium">${startupDetails.investment.minimum.toLocaleString()}</span>
+                  <span className="font-medium">${startup.minimumInvestment.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Equity Offered</span>
-                  <span className="font-medium">{startupDetails.investment.equity}</span>
+                  <span className="font-medium">{startup.equityOffered}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Closing Date</span>
-                  <span className="font-medium">{startupDetails.investment.closingDate}</span>
+                  <span className="font-medium">{startup.closingDate}</span>
                 </div>
               </div>
 
@@ -248,41 +538,10 @@ export default function StartupDetailsPage() {
             </div>
           </Card>
 
-          {/* Contact Information */}
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold mb-6">Contact Information</h2>
-            
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <Mail className="h-4 w-4 text-gray-500" />
-                <a href={`mailto:${startupDetails.contact.email}`} className="text-singlife-primary hover:underline">
-                  {startupDetails.contact.email}
-                </a>
-              </div>
-              <div className="flex items-center gap-3">
-                <Phone className="h-4 w-4 text-gray-500" />
-                <span>{startupDetails.contact.phone}</span>
-              </div>
-            </div>
-          </Card>
-
-          {/* Documents */}
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold mb-6">Documents</h2>
-            
-            <div className="space-y-3">
-              {startupDetails.investment.documents.map((doc) => (
-                <Button
-                  key={doc.name}
-                  variant="outline"
-                  className="w-full justify-start gap-3"
-                >
-                  <FileText className="h-4 w-4" />
-                  {doc.name}
-                </Button>
-              ))}
-            </div>
-          </Card>
+          {/* Generate Report Button */}
+          <Button className="w-full" variant="outline">
+            Generate Report
+          </Button>
         </div>
       </div>
     </div>
