@@ -16,7 +16,8 @@ import {
   Newspaper,
   Building2,
   TrendingUp,
-  User
+  User,
+  Bell
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useSidebar } from './sidebar-context';
@@ -48,6 +49,7 @@ export function Navbar() {
   const startupMenuItems = [
     { href: "/dashboard", icon: Home, label: "Dashboard" },
     { href: "/startups/edit/profile", icon: User, label: "My Profile" },
+    { href: "/startups/requests", icon: Bell, label: "Requests" },
     { href: "/about", icon: Info, label: "About" },
   ];
 
