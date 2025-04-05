@@ -28,16 +28,15 @@ async function UserOrLogin() {
 
       <div className="flex items-center font-semibold">
         <IconSeparator className="size-6 text-muted-foreground/50" />
-        <a href="/new">StockBot</a>
+        <Link href="/chat">StockBot</Link>
         <IconSeparator className="size-6 text-muted-foreground/50" />
-        <a
-          href="/new"
-          rel="noopener noreferrer"
+        <Link
+          href="/chat"
           className={cn(buttonVariants({ variant: 'ghost' }))}
           style={{ borderRadius: 0, color: '#F55036', padding: '4px' }}
         >
           <span className="flex">Start New Chat</span>
-        </a>
+        </Link>
       </div>
     </>
   )

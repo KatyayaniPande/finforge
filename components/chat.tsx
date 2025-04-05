@@ -27,6 +27,7 @@ export function Chat({ id, className, session, missingKeys }: ChatProps) {
   const [input, setInput] = useState('')
   const [messages] = useUIState()
   const [aiState] = useAIState()
+  const [hasRefreshed, setHasRefreshed] = useState(false)
 
   const [_, setNewChatId] = useLocalStorage('newChatId', id)
 
@@ -40,11 +41,12 @@ export function Chat({ id, className, session, missingKeys }: ChatProps) {
 
   useEffect(() => {
     const messagesLength = aiState.messages?.length
-    if (messagesLength === 2) {
+    if (messagesLength === 2 && !hasRefreshed) {
+      setHasRefreshed(true)
       router.refresh()
     }
     console.log('Value: ', aiState.messages)
-  }, [aiState.messages, router])
+  }, [aiState.messages, router, hasRefreshed])
 
   useEffect(() => {
     setNewChatId(id)
