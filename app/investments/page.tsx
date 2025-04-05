@@ -52,13 +52,11 @@ interface FilterState {
 // Define available filter options
 const filterOptions = {
   industry: [
-    { value: "AI", label: "AI & Machine Learning", count: 12 },
+    { value: "AI & Machine Learning", label: "AI & Machine Learning", count: 12 },
     { value: "CleanTech", label: "CleanTech", count: 8 },
     { value: "Cybersecurity", label: "Cybersecurity", count: 15 },
     { value: "FinTech", label: "FinTech", count: 20 },
     { value: "HealthTech", label: "HealthTech", count: 18 },
-    { value: "Robotics", label: "Robotics", count: 6 },
-    { value: "SpaceTech", label: "SpaceTech", count: 4 },
     { value: "BioTech", label: "BioTech", count: 10 }
   ],
   stage: [
@@ -173,6 +171,18 @@ export default function InvestmentsPage() {
   // Filter and sort startups
   const filteredStartups = currentTabStartups
     .filter((startup) => {
+      console.log('Filtering startup:', {
+        name: startup.company_name,
+        currentFilters: filters,
+        startupValues: {
+          industry: startup.industry,
+          stage: startup.stage,
+          location: startup.location,
+          teamSize: startup.teamSize,
+          product_stage: startup.product_stage
+        }
+      });
+
       // Search filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase()
@@ -184,9 +194,13 @@ export default function InvestmentsPage() {
         if (!matchesSearch) return false
       }
 
-      // Category filters
-      if (filters.stage && startup.stage !== filters.stage) return false
-      if (filters.product_stage && startup.product_stage !== filters.product_stage) return false
+      // Category filters - normalize values for comparison
+      if (filters.stage && startup.stage.toLowerCase() !== filters.stage.toLowerCase()) return false
+      if (filters.product_stage && startup.product_stage.toLowerCase() !== filters.product_stage.toLowerCase()) return false
+      if (filters.industry && startup.industry?.toLowerCase() !== filters.industry.toLowerCase()) return false
+      if (filters.location && startup.location?.toLowerCase() !== filters.location.toLowerCase()) return false
+      if (filters.teamSize && startup.teamSize?.toLowerCase() !== filters.teamSize.toLowerCase()) return false
+      
       return true
     })
     .sort((a, b) => {
@@ -305,10 +319,19 @@ export default function InvestmentsPage() {
                 filters.industry === option.value ? 'bg-singlife-primary text-white hover:text-white' : ''
               }`}
               onClick={() => {
-                setFilters(prev => ({
-                  ...prev,
-                  industry: prev.industry === option.value ? null : option.value
-                }))
+                const newFilters = {
+                  ...filters,
+                  industry: filters.industry === option.value ? null : option.value
+                };
+                console.log('Setting industry filter:', {
+                  oldValue: filters.industry,
+                  newValue: newFilters.industry,
+                  availableStartups: currentTabStartups.map(s => ({
+                    name: s.company_name,
+                    industry: s.industry
+                  }))
+                });
+                setFilters(newFilters);
               }}
             >
               {option.label}
@@ -334,10 +357,19 @@ export default function InvestmentsPage() {
                 filters.stage === option.value ? 'bg-singlife-primary text-white hover:text-white' : ''
               }`}
               onClick={() => {
-                setFilters(prev => ({
-                  ...prev,
-                  stage: prev.stage === option.value ? null : option.value
-                }))
+                const newFilters = {
+                  ...filters,
+                  stage: filters.stage === option.value ? null : option.value
+                };
+                console.log('Setting stage filter:', {
+                  oldValue: filters.stage,
+                  newValue: newFilters.stage,
+                  availableStartups: currentTabStartups.map(s => ({
+                    name: s.company_name,
+                    stage: s.stage
+                  }))
+                });
+                setFilters(newFilters);
               }}
             >
               {option.label}
@@ -363,10 +395,19 @@ export default function InvestmentsPage() {
                 filters.location === option.value ? 'bg-singlife-primary text-white hover:text-white' : ''
               }`}
               onClick={() => {
-                setFilters(prev => ({
-                  ...prev,
-                  location: prev.location === option.value ? null : option.value
-                }))
+                const newFilters = {
+                  ...filters,
+                  location: filters.location === option.value ? null : option.value
+                };
+                console.log('Setting location filter:', {
+                  oldValue: filters.location,
+                  newValue: newFilters.location,
+                  availableStartups: currentTabStartups.map(s => ({
+                    name: s.company_name,
+                    location: s.location
+                  }))
+                });
+                setFilters(newFilters);
               }}
             >
               {option.label}
@@ -392,10 +433,19 @@ export default function InvestmentsPage() {
                 filters.teamSize === option.value ? 'bg-singlife-primary text-white hover:text-white' : ''
               }`}
               onClick={() => {
-                setFilters(prev => ({
-                  ...prev,
-                  teamSize: prev.teamSize === option.value ? null : option.value
-                }))
+                const newFilters = {
+                  ...filters,
+                  teamSize: filters.teamSize === option.value ? null : option.value
+                };
+                console.log('Setting teamSize filter:', {
+                  oldValue: filters.teamSize,
+                  newValue: newFilters.teamSize,
+                  availableStartups: currentTabStartups.map(s => ({
+                    name: s.company_name,
+                    teamSize: s.teamSize
+                  }))
+                });
+                setFilters(newFilters);
               }}
             >
               {option.label}
@@ -421,10 +471,19 @@ export default function InvestmentsPage() {
                 filters.product_stage === stage ? 'bg-singlife-primary text-white hover:text-white' : ''
               }`}
               onClick={() => {
-                setFilters(prev => ({
-                  ...prev,
-                  product_stage: prev.product_stage === stage ? null : stage
-                }))
+                const newFilters = {
+                  ...filters,
+                  product_stage: filters.product_stage === stage ? null : stage
+                };
+                console.log('Setting product_stage filter:', {
+                  oldValue: filters.product_stage,
+                  newValue: newFilters.product_stage,
+                  availableStartups: currentTabStartups.map(s => ({
+                    name: s.company_name,
+                    product_stage: s.product_stage
+                  }))
+                });
+                setFilters(newFilters);
               }}
             >
               {stage}

@@ -34,6 +34,9 @@ export interface Startup {
   current_valuation: string;
   projected_exit_value: string;
   exit_timeline: string;
+  industry: string;
+  location: string;
+  teamSize: string;
 }
 
 export async function getAllStartups(): Promise<Startup[]> {
