@@ -33,6 +33,7 @@ import { Badge } from '@/components/ui/badge';
 import { PerformanceChart } from "@/components/dashboard/PerformanceChart";
 import { SectorAllocationChart } from "@/components/dashboard/SectorAllocationChart";
 import { InvestmentsTable } from "@/components/dashboard/InvestmentsTable";
+import { InvestorProfile } from "@/components/dashboard/InvestorProfile";
 
 // Mock data for demonstration
 const mockPortfolio = {
@@ -72,6 +73,16 @@ const mockPortfolio = {
     { sector: 'AI/ML', percentage: 15, amount: 480000 },
     { sector: 'Other', percentage: 5, amount: 160000 }
   ]
+};
+
+// Add mock investor profile data
+const mockInvestorProfile = {
+  riskTolerance: 'Medium' as const,
+  investmentStrategy: 'Growth-focused' as const,
+  preferredSectors: ['HealthTech', 'FinTech', 'AI/ML'],
+  investmentStagePreference: ['Seed', 'Series A'],
+  averageInvestmentSize: 100000,
+  portfolioDiversificationGoal: 'Increase exposure in AI/ML sector while maintaining balance in HealthTech'
 };
 
 export default function DashboardPage() {
@@ -155,6 +166,11 @@ export default function DashboardPage() {
             <p className="text-xs text-gray-500">Next 30 days</p>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Investor Profile */}
+      <div className="mb-8">
+        <InvestorProfile {...mockInvestorProfile} />
       </div>
 
       {/* Main Content */}
