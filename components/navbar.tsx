@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, LayoutDashboard } from 'lucide-react';
+import { MessageSquare, LayoutDashboard, Newspaper } from 'lucide-react';
 
 export function Navbar() {
   const pathname = usePathname();
@@ -29,6 +29,15 @@ export function Navbar() {
             >
               <MessageSquare className="h-4 w-4" />
               Chat
+            </Button>
+          </Link>
+          <Link href="/news">
+            <Button
+              variant={pathname.includes('news') ? 'default' : 'ghost'}
+              className="flex items-center gap-2"
+            >
+              <Newspaper className="h-4 w-4" />
+              News
             </Button>
           </Link>
         </div>
