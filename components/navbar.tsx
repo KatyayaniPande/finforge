@@ -4,70 +4,174 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, LayoutDashboard, Newspaper, FileText, Info } from 'lucide-react';
+import { 
+  Home, 
+  FileText, 
+  BarChart2, 
+  Shield, 
+  Users, 
+  Settings, 
+  LogOut,
+  User,
+  Info,
+  ChevronLeft,
+  ChevronRight
+} from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useSidebar } from './sidebar-context';
 
 export function Navbar() {
   const pathname = usePathname();
-
-  // Function to determine active button style
-  const getButtonClass = (path: string) => {
-    return pathname === path || pathname.includes(path)
-      ? 'bg-red-600 text-white'  // Red background with white text for active
-      : 'bg-transparent text-red-600 hover:bg-red-500 hover:text-white'; // Transparent background, red text for inactive with hover effect
-  };
+  const { isCollapsed, toggleSidebar } = useSidebar();
 
   return (
-    <div className="border-b bg-white">
-      <div className="flex h-16 items-center px-4">
-        {/* Singlife Logo on the left */}
-        <img
-          src="https://singlife.com/etc.clientlibs/asl-public/clientlibs/clientlib-base/resources/assets/logo/sl-logo-singlife.png"
-          alt="Singlife Logo"
-          className="h-8" // Adjust the size of the logo as needed
-        />
+    <div 
+      className={cn(
+        "fixed left-0 top-0 h-full bg-white border-r border-singlife-primary flex flex-col transition-all duration-300",
+        isCollapsed ? "w-16" : "w-56"
+      )}
+    >
+      <div className="p-2">
+        <div className="flex items-center justify-between mb-4">
+          {!isCollapsed && <h1 className="text-xl font-bold text-singlife-primary">FinForge</h1>}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="ml-auto h-8 w-8"
+            onClick={toggleSidebar}
+          >
+            {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          </Button>
+        </div>
         
-        {/* Sections aligned to the right */}
-        <div className="flex items-center space-x-4 ml-auto">
-          <Link href="/dashboard">
+        <nav className="space-y-1">
+          <Link href="/">
             <Button
-              className={`flex items-center gap-2 ${getButtonClass('/dashboard')}`}
+              variant="ghost"
+              size="sm"
+              className={cn(
+                'w-full justify-start gap-2 h-9',
+                pathname === '/' && 'bg-singlife-light text-singlife-primary',
+                isCollapsed && 'justify-center'
+              )}
             >
-              <LayoutDashboard className="h-4 w-4" />
-              Dashboard
+              <Home className="h-4 w-4" />
+              {!isCollapsed && "Dashboard"}
             </Button>
           </Link>
-          <Link href="/chat">
-            <Button
-              className={`flex items-center gap-2 ${getButtonClass('chat')}`}
-            >
-              <MessageSquare className="h-4 w-4" />
-              Chat
-            </Button>
-          </Link>
-          <Link href="/news">
-            <Button
-              className={`flex items-center gap-2 ${getButtonClass('news')}`}
-            >
-              <Newspaper className="h-4 w-4" />
-              News
-            </Button>
-          </Link>
+
           <Link href="/due-diligence">
             <Button
-              className={`flex items-center gap-2 ${getButtonClass('due-diligence')}`}
+              variant="ghost"
+              size="sm"
+              className={cn(
+                'w-full justify-start gap-2 h-9',
+                pathname === '/due-diligence' && 'bg-singlife-light text-singlife-primary',
+                isCollapsed && 'justify-center'
+              )}
             >
               <FileText className="h-4 w-4" />
-              Due Diligence
+              {!isCollapsed && "Due Diligence"}
             </Button>
           </Link>
+
+          <Link href="/risk-assessment">
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(
+                'w-full justify-start gap-2 h-9',
+                pathname === '/risk-assessment' && 'bg-singlife-light text-singlife-primary',
+                isCollapsed && 'justify-center'
+              )}
+            >
+              <BarChart2 className="h-4 w-4" />
+              {!isCollapsed && "Risk Assessment"}
+            </Button>
+          </Link>
+
+          <Link href="/compliance">
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(
+                'w-full justify-start gap-2 h-9',
+                pathname === '/compliance' && 'bg-singlife-light text-singlife-primary',
+                isCollapsed && 'justify-center'
+              )}
+            >
+              <Shield className="h-4 w-4" />
+              {!isCollapsed && "Compliance"}
+            </Button>
+          </Link>
+
+          <Link href="/team">
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(
+                'w-full justify-start gap-2 h-9',
+                pathname === '/team' && 'bg-singlife-light text-singlife-primary',
+                isCollapsed && 'justify-center'
+              )}
+            >
+              <Users className="h-4 w-4" />
+              {!isCollapsed && "Team"}
+            </Button>
+          </Link>
+
           <Link href="/about">
             <Button
-              className={`flex items-center gap-2 ${getButtonClass('about')}`}
+              variant="ghost"
+              size="sm"
+              className={cn(
+                'w-full justify-start gap-2 h-9',
+                pathname === '/about' && 'bg-singlife-light text-singlife-primary',
+                isCollapsed && 'justify-center'
+              )}
             >
               <Info className="h-4 w-4" />
-              About
+              {!isCollapsed && "About"}
             </Button>
           </Link>
+        </nav>
+      </div>
+
+      <div className="mt-auto p-2 border-t border-singlife-primary">
+        <div className={cn("flex items-center gap-2 mb-2", isCollapsed && "justify-center")}>
+          <Avatar className="h-8 w-8">
+            <AvatarImage src="/avatar-placeholder.png" />
+            <AvatarFallback>JD</AvatarFallback>
+          </Avatar>
+          {!isCollapsed && (
+            <div>
+              <p className="font-medium text-sm text-singlife-secondary">John Doe</p>
+              <p className="text-xs text-gray-500">Admin</p>
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            className={cn("w-full justify-start gap-2 h-9", isCollapsed && "justify-center")}
+          >
+            <Settings className="h-4 w-4" />
+            {!isCollapsed && "Settings"}
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            className={cn(
+              "w-full justify-start gap-2 h-9 text-red-500 hover:text-red-600",
+              isCollapsed && "justify-center"
+            )}
+          >
+            <LogOut className="h-4 w-4" />
+            {!isCollapsed && "Logout"}
+          </Button>
         </div>
       </div>
     </div>

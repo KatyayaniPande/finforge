@@ -10,6 +10,7 @@ import { Providers } from '@/components/providers'
 import { Header } from '@/components/header'
 import { Toaster } from '@/components/ui/sonner'
 import { Navbar } from "@/components/navbar";
+import { SidebarProvider } from "@/components/sidebar-context";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,11 +19,11 @@ export const metadata: Metadata = {
     ? new URL(`https://${process.env.VERCEL_URL}`)
     : undefined,
   title: {
-    default: 'StockBot powered by Groq',
-    template: `%s - StockBot powered by Groq`
+    default: 'FinForge - Contract and Investment Due Diligence Tool',
+    template: `%s - FinForge`
   },
   description:
-    'Lightning Fast AI Chatbot that Responds With Live Interactive Stock Charts, Financials, News, Screeners, and More.',
+    'AI-powered contract and investment due diligence platform for Singlife',
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon-16x16.png',
@@ -59,10 +60,18 @@ export default function RootLayout({ children }: RootLayoutProps) {
           enableSystem
           disableTransitionOnChange
         >
-          <div className="flex flex-col min-h-screen">
-            <Navbar />
-            <main className="flex flex-col flex-1 bg-muted/50">{children}</main>
-          </div>
+          <SidebarProvider>
+            <div className="flex min-h-screen">
+              <Navbar />
+              <div className="flex-1 transition-all duration-300 ml-16 lg:ml-56">
+                <main className="p-4 lg:p-6">
+                  <div className="max-w-7xl mx-auto">
+                    {children}
+                  </div>
+                </main>
+              </div>
+            </div>
+          </SidebarProvider>
           {/* <ThemeToggle /> */}
         </Providers>
       </body>
