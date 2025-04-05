@@ -39,30 +39,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-
-interface Startup {
-  id: number
-  company_name: string
-  stage: string
-  product_short: string
-  description: string
-  arr: string
-  founders: string
-  tam: string
-  market_growth_rate: string
-  product_stage: string
-  user_growth: string
-  revenue_growth: string
-  current_valuation: string
-  projected_exit_value: string
-  exit_timeline: string
-}
-
-interface StartupsData {
-  featured: Startup[]
-  trending: Startup[]
-  recent: Startup[]
-}
+import { Startup } from "@/lib/db/investments"
 
 interface FilterState {
   industry: string | null
@@ -85,6 +62,7 @@ const filterOptions = {
     { value: "BioTech", label: "BioTech", count: 10 }
   ],
   stage: [
+    { value: "Pre-Seed", label: "Pre-Seed", count: 15 },
     { value: "Seed", label: "Seed", count: 25 },
     { value: "Series A", label: "Series A", count: 18 },
     { value: "Series B", label: "Series B", count: 12 },
@@ -104,84 +82,6 @@ const filterOptions = {
   ]
 }
 
-// Sample data - Replace with actual database fetch
-const startups: StartupsData = {
-  featured: [
-    {
-      id: 1,
-      company_name: "NeuralKey",
-      stage: "Series A",
-      product_short: "AI Security Platform",
-      description: "Enterprise-grade AI security platform with advanced threat detection and real-time response capabilities.",
-      arr: "$1.2M",
-      founders: "John Smith, Sarah Johnson",
-      tam: "$15B",
-      market_growth_rate: "28% CAGR",
-      product_stage: "Revenue-generating",
-      user_growth: "42% MoM",
-      revenue_growth: "35% MoM",
-      current_valuation: "$15M",
-      projected_exit_value: "$120M",
-      exit_timeline: "3-5 years"
-    },
-    {
-      id: 2,
-      company_name: "OceanPulse",
-      stage: "Seed",
-      product_short: "Ocean Monitoring Tech",
-      description: "Revolutionary ocean monitoring technology providing real-time data for environmental conservation.",
-      arr: "$500K",
-      founders: "Michael Chen, Lisa Wong",
-      tam: "$8B",
-      market_growth_rate: "22% CAGR",
-      product_stage: "Beta",
-      user_growth: "35% MoM",
-      revenue_growth: "28% MoM",
-      current_valuation: "$8M",
-      projected_exit_value: "$80M",
-      exit_timeline: "4-6 years"
-    }
-  ],
-  trending: [
-    {
-      id: 3,
-      company_name: "MediSync",
-      stage: "Series A",
-      product_short: "Healthcare Platform",
-      description: "AI-powered healthcare platform streamlining patient care and medical record management.",
-      arr: "$2.5M",
-      founders: "David Lee, Emily Tan",
-      tam: "$12B",
-      market_growth_rate: "35% CAGR",
-      product_stage: "Revenue-generating",
-      user_growth: "45% MoM",
-      revenue_growth: "38% MoM",
-      current_valuation: "$25M",
-      projected_exit_value: "$150M",
-      exit_timeline: "3-4 years"
-    }
-  ],
-  recent: [
-    {
-      id: 4,
-      company_name: "FinEdge",
-      stage: "Series B",
-      product_short: "FinTech Platform",
-      description: "Next-generation fintech platform revolutionizing cross-border payments.",
-      arr: "$5M",
-      founders: "James Wilson, Sarah Chen",
-      tam: "$20B",
-      market_growth_rate: "30% CAGR",
-      product_stage: "Scaling",
-      user_growth: "50% MoM",
-      revenue_growth: "40% MoM",
-      current_valuation: "$50M",
-      projected_exit_value: "$200M",
-      exit_timeline: "2-3 years"
-    }
-  ]
-}
-
 export default function InvestmentsPage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [activeTab, setActiveTab] = useState("featured")
@@ -194,9 +94,84 @@ export default function InvestmentsPage() {
     teamSize: null,
     product_stage: null
   })
+  const [featuredStartups, setFeaturedStartups] = useState<Startup[]>([])
+  const [trendingStartups, setTrendingStartups] = useState<Startup[]>([])
+  const [earlyStageStartups, setEarlyStageStartups] = useState<Startup[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchStartups = async () => {
+      try {
+        console.log('Frontend: Starting to fetch startups...');
+        setLoading(true)
+        setError(null)
+
+        console.log('Frontend: Making API requests...');
+        const [featuredRes, trendingRes, earlyStageRes] = await Promise.all([
+          fetch('/api/investments?type=featured'),
+          fetch('/api/investments?type=trending'),
+          fetch('/api/investments?type=early-stage')
+        ])
+
+        console.log('Frontend: API Response statuses:', {
+          featured: featuredRes.status,
+          trending: trendingRes.status,
+          earlyStage: earlyStageRes.status
+        });
+
+        if (!featuredRes.ok || !trendingRes.ok || !earlyStageRes.ok) {
+          console.error('Frontend: Response details:', {
+            featured: await featuredRes.text().catch(() => 'Failed to get response text'),
+            trending: await trendingRes.text().catch(() => 'Failed to get response text'),
+            earlyStage: await earlyStageRes.text().catch(() => 'Failed to get response text')
+          });
+          throw new Error('Failed to fetch startups')
+        }
+
+        console.log('Frontend: Parsing JSON responses...');
+        const [featured, trending, earlyStage] = await Promise.all([
+          featuredRes.json(),
+          trendingRes.json(),
+          earlyStageRes.json()
+        ])
+
+        console.log('Frontend: Received data:', {
+          featured: featured?.data?.length || 0,
+          trending: trending?.data?.length || 0,
+          earlyStage: earlyStage?.data?.length || 0
+        });
+
+        setFeaturedStartups(featured.data || [])
+        setTrendingStartups(trending.data || [])
+        setEarlyStageStartups(earlyStage.data || [])
+      } catch (err) {
+        console.error('Frontend Error:', err)
+        setError('Failed to load startups')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchStartups()
+  }, [])
+
+  // Get the current tab's startups
+  const currentTabStartups = (() => {
+    switch (activeTab) {
+      case "featured":
+        return featuredStartups
+      case "trending":
+        return trendingStartups
+      case "early":
+        return earlyStageStartups
+      default:
+        return []
+    }
+  })()
 
   // Filter and sort startups
-  const filteredStartups = startups[activeTab as keyof StartupsData]
+  const filteredStartups = currentTabStartups
     .filter((startup) => {
       // Search filter
       if (searchQuery) {
@@ -217,11 +192,11 @@ export default function InvestmentsPage() {
     .sort((a, b) => {
       switch (sortBy) {
         case "valuation":
-          return parseFloat(b.current_valuation.replace('$', '')) - parseFloat(a.current_valuation.replace('$', ''))
+          return parseFloat(b.current_valuation.replace(/[^0-9.]/g, '')) - parseFloat(a.current_valuation.replace(/[^0-9.]/g, ''))
         case "growth":
-          return parseFloat(b.revenue_growth.replace('%', '')) - parseFloat(a.revenue_growth.replace('%', ''))
+          return parseFloat(b.revenue_growth.replace(/[^0-9.]/g, '')) - parseFloat(a.revenue_growth.replace(/[^0-9.]/g, ''))
         case "stage":
-          const stageOrder: Record<string, number> = { "Seed": 0, "Series A": 1, "Series B": 2, "Series C+": 3 }
+          const stageOrder: Record<string, number> = { "Pre-Seed": 0, "Seed": 1, "Series A": 2, "Series B": 3, "Series C+": 4 }
           return (stageOrder[b.stage] || 0) - (stageOrder[a.stage] || 0)
         default:
           return 0
@@ -580,14 +555,14 @@ export default function InvestmentsPage() {
               Trending
             </Button>
             <Button
-              variant={activeTab === "recent" ? "default" : "outline"}
-              onClick={() => setActiveTab("recent")}
+              variant={activeTab === "early" ? "default" : "outline"}
+              onClick={() => setActiveTab("early")}
               className={`flex items-center gap-2 whitespace-nowrap ${
-                activeTab === "recent" ? 'bg-singlife-primary text-white hover:bg-singlife-primary/90' : ''
+                activeTab === "early" ? 'bg-singlife-primary text-white hover:bg-singlife-primary/90' : ''
               }`}
             >
               <Clock className="h-4 w-4" />
-              Recent
+              Early Stage
             </Button>
           </div>
 

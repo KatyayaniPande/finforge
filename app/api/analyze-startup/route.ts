@@ -1,66 +1,183 @@
 import { NextResponse } from 'next/server';
+import OpenAI from 'openai';
 
-const mockData = {
+// Mock data for development when API key is not available
+const mockAnalysis = {
   marketAnalysis: {
-    marketSizeAssessment: "The Total Addressable Market (TAM) for this startup is $1 billion, indicating significant potential for revenue generation and growth within the industry. Given the robust growth rate of 15%, the market is expected to expand rapidly, providing a favorable environment for the startup to scale its operations and capture market share.",
-    growthPotential: "With a current user base of 10,000 and a monthly growth rate of 20%, the startup is on a strong trajectory to increase its user base significantly over the next few years. Coupled with a 15% overall market growth rate, this suggests that the startup could potentially capture a sizeable portion of the market by leveraging its current growth momentum.",
-    competitivePosition: "The company's current position is competitive due to its solid retention rate of 80%, which indicates that customers find value in the product. The successful launch and favorable market conditions suggest that the startup is well-positioned against competitors, provided it can maintain user satisfaction and address any emerging competition effectively."
+    marketSizeAssessment: "The startup operates in a large addressable market of $8.7B with significant growth potential.",
+    growthPotential: "Strong growth trajectory supported by 35% YoY market expansion and increasing adoption.",
+    competitivePosition: "Market leader position with proprietary technology creating high barriers to entry."
   },
   financialMetrics: {
-    revenueProjection: "The startup's monthly revenue growth rate of 25%, combined with a current revenue of $100,000, points to potential exponential revenue growth. If this rate is maintained, annual revenue could exceed $1 million, thus reflecting a solid financial trajectory with a gross margin of 60%, which is favorable for sustainability and profitability.",
-    valuationAssessment: "Currently valued at $5 million with projections of reaching an exit value of $50 million in 36 months suggests an attractive growth potential. A 10.00x multiple on the initial investment indicates high expected returns upon exit, making the startup appealing for investors looking for high-growth opportunities.",
-    returnPotential: "The Internal Rate of Return (IRR) of 115.44% and a risk-adjusted return of 98.13% are exceptionally strong, offering compelling incentives for investors. The payback period of 12 months presents a low risk of capital loss and indicates rapid recovery of investment."
+    revenueProjection: "Current revenue of $4.5M with projected growth to $15M within 24 months.",
+    valuationAssessment: "Current valuation of $120M is justified by strong growth metrics and market position.",
+    returnPotential: "Potential for 6.7x return based on projected exit value and timeline."
   },
   riskAnalysis: {
     marketRisks: [
-      "Increased competition leading to market saturation",
-      "Changes in consumer preferences affecting retention and acquisition",
-      "Economic downturn affecting overall market growth rate"
+      "Regulatory changes in sports betting markets",
+      "Emerging competition from established tech companies"
     ],
     operationalRisks: [
-      "Challenges in scaling operations to meet user growth",
-      "Reliability of technology and infrastructure as user base expands",
-      "Human resource challenges in hiring and retaining talent"
+      "Scaling infrastructure to meet demand",
+      "Maintaining accuracy during rapid growth"
     ],
     financialRisks: [
-      "Reliance on continued investor funding for accelerated growth",
-      "Potential for cash flow issues during scaling if growth slows",
-      "Vulnerability to fluctuations in gross margins depending on operating efficiencies"
+      "High cash burn rate during expansion",
+      "Dependency on future funding rounds"
     ]
   },
   investmentRecommendation: {
     riskLevel: "medium",
-    expectedReturn: "Investors can anticipate high returns given the expected IRR of 115.44% and a viable exit plan targeting a valuation increase of 10x. With a strong revenue growth trajectory and a robust market growth rate, opportunities for substantial returns are promising.",
-    timeHorizon: "The recommended investment horizon aligns with the projected exit timeline of 36 months, allowing investors to benefit from the planned growth and exit strategy.",
+    expectedReturn: "Expected IRR of 67% based on projected exit value of $800M in 2-3 years.",
+    timeHorizon: "2-3 year path to exit through strategic acquisition or IPO.",
     keyConsiderations: [
-      "Monitor user acquisition and retention strategies to stay ahead of market competition",
-      "Ensure operational scalability to support rapid growth without sacrificing service quality",
-      "Maintain a strong financial cushion to manage potential cash flow challenges"
+      "Strong product-market fit with proven traction",
+      "Experienced team with domain expertise",
+      "Clear path to profitability with current growth rate"
     ]
   },
   keyMetrics: {
-    irr: 115.44346900318838,
-    multiple: 10,
-    paybackPeriod: 12,
-    riskAdjustedReturn: 98.12694865271013
+    irr: 67.5,
+    multiple: 6.7,
+    paybackPeriod: 18,
+    riskAdjustedReturn: 57.4
   }
 };
 
-export const dynamic = 'force-dynamic';
-
 export async function POST(request: Request) {
   try {
-    console.log('POST request received');
+    console.log('POST /api/analyze-startup: Received request');
     const body = await request.json();
-    console.log('Request body:', body);
+    
+    const { prompt } = body;
+    if (!prompt) {
+      console.error('POST /api/analyze-startup: No prompt provided');
+      return NextResponse.json(
+        { error: 'Prompt is required' },
+        { status: 400 }
+      );
+    }
 
-    // Here we could use the body data to calculate actual metrics
-    // For now, we're returning the mock data
-    return NextResponse.json(mockData);
+    // Check for API key
+    const apiKey = process.env.OPENAI_API_KEY;
+    console.log('POST /api/analyze-startup: Environment variables:', {
+      OPENAI_API_KEY_EXISTS: !!process.env.OPENAI_API_KEY,
+      OPENAI_API_KEY_LENGTH: process.env.OPENAI_API_KEY?.length,
+      NODE_ENV: process.env.NODE_ENV
+    });
+    
+    if (!apiKey) {
+      console.log('POST /api/analyze-startup: No API key found, using mock data');
+      return NextResponse.json({
+        ...mockAnalysis,
+        _debug: {
+          mode: 'mock',
+          reason: 'No API key found'
+        }
+      });
+    }
+
+    try {
+      console.log('POST /api/analyze-startup: Initializing OpenAI with API key');
+      const openai = new OpenAI({
+        apiKey: apiKey
+      });
+
+      console.log('POST /api/analyze-startup: Sending request to OpenAI');
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4-turbo-preview",
+        messages: [
+          {
+            role: "system",
+            content: `You are an expert venture capital analyst. Analyze the startup data and return a JSON response with the following structure:
+{
+  "marketAnalysis": {
+    "marketSizeAssessment": string,
+    "growthPotential": string,
+    "competitivePosition": string
+  },
+  "financialMetrics": {
+    "revenueProjection": string,
+    "valuationAssessment": string,
+    "returnPotential": string
+  },
+  "riskAnalysis": {
+    "marketRisks": string[],
+    "operationalRisks": string[],
+    "financialRisks": string[]
+  },
+  "investmentRecommendation": {
+    "riskLevel": "low" | "medium" | "high",
+    "expectedReturn": string,
+    "timeHorizon": string,
+    "keyConsiderations": string[]
+  },
+  "keyMetrics": {
+    "irr": number,
+    "multiple": number,
+    "paybackPeriod": number,
+    "riskAdjustedReturn": number
+  }
+}`
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 2000,
+        response_format: { type: "json_object" }
+      });
+
+      console.log('POST /api/analyze-startup: OpenAI Response received:', {
+        status: 'success',
+        model: completion.model,
+        usage: completion.usage
+      });
+
+      const content = completion.choices[0].message.content;
+      if (!content) {
+        throw new Error('No content received from OpenAI');
+      }
+
+      const analysis = JSON.parse(content);
+      return NextResponse.json({
+        ...analysis,
+        _debug: {
+          mode: 'openai',
+          model: completion.model,
+          usage: completion.usage
+        }
+      });
+
+    } catch (openaiError) {
+      console.error('POST /api/analyze-startup: OpenAI Error:', {
+        name: openaiError instanceof Error ? openaiError.name : 'Unknown',
+        message: openaiError instanceof Error ? openaiError.message : String(openaiError)
+      });
+      
+      // Fallback to mock data on OpenAI error
+      return NextResponse.json({
+        ...mockAnalysis,
+        _debug: {
+          mode: 'mock',
+          reason: 'OpenAI Error',
+          error: openaiError instanceof Error ? openaiError.message : String(openaiError)
+        }
+      });
+    }
   } catch (error) {
-    console.error('Error in POST /api/analyze-startup:', error);
+    console.error('POST /api/analyze-startup: Error:', {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : String(error)
+    });
     return NextResponse.json(
-      { error: 'Failed to analyze startup' },
+      { 
+        error: 'Failed to generate analysis',
+        details: error instanceof Error ? error.message : String(error)
+      },
       { status: 500 }
     );
   }
