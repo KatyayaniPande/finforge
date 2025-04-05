@@ -48,9 +48,9 @@ export async function POST(request: Request) {
     } catch (fetchError) {
       console.error('Error connecting to analysis service:', fetchError);
       return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Could not connect to analysis service. Make sure it is running at http://127.0.0.1:8000' 
+        {
+          success: false,
+          error: 'Could not connect to analysis service. Make sure it is running at http://127.0.0.1:8000'
         },
         { status: 503 }
       );
@@ -59,9 +59,9 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Error in analyze API:', error);
     return NextResponse.json(
-      { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'An error occurred during analysis' 
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'An error occurred during analysis'
       },
       { status: 500 }
     );

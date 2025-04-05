@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { 
-  getAllStartups, 
-  getStartupById, 
-  getStartupsByStage, 
-  getHighArrStartups, 
+import {
+  getAllStartups,
+  getStartupById,
+  getStartupsByStage,
+  getHighArrStartups,
   getStartupsByValuation,
   getAverageTamByStage,
   getAiStartups,

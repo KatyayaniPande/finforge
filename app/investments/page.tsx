@@ -8,14 +8,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { 
-  Search, 
-  Filter, 
-  TrendingUp, 
-  Star, 
-  Clock, 
-  MapPin, 
-  Users2, 
+import {
+  Search,
+  Filter,
+  TrendingUp,
+  Star,
+  Clock,
+  MapPin,
+  Users2,
   Building2,
   Rocket,
   Brain,
@@ -138,10 +138,10 @@ export default function InvestmentsPage() {
       try {
         const response = await fetch('/api/startups?query=all');
         const result = await response.json();
-        
+
         if (result.success && result.data) {
           const startups = result.data.startups || [];
-          
+
           // Calculate industry counts
           const industryCount = startups.reduce((acc: Record<string, number>, startup: Startup) => {
             if (startup.industry) {
@@ -209,7 +209,7 @@ export default function InvestmentsPage() {
       // Search filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase()
-        const matchesSearch = 
+        const matchesSearch =
           startup.company_name.toLowerCase().includes(query) ||
           startup.description.toLowerCase().includes(query) ||
           startup.product_short.toLowerCase().includes(query) ||
@@ -220,7 +220,7 @@ export default function InvestmentsPage() {
       // Category filters - normalize values for comparison
       if (filters.stage && startup.stage.toLowerCase() !== filters.stage.toLowerCase()) return false
       if (filters.industry && startup.industry?.toLowerCase() !== filters.industry.toLowerCase()) return false
-      
+
       return true
     })
     .sort((a, b) => {
@@ -329,12 +329,11 @@ export default function InvestmentsPage() {
         </h3>
         <div className="space-y-2">
           {filterCounts.industry.map((option) => (
-            <Button 
-              key={option.value} 
-              variant={filters.industry === option.value ? "default" : "ghost"} 
-              className={`w-full justify-start hover:bg-singlife-light transition-colors ${
-                filters.industry === option.value ? 'bg-singlife-primary text-white hover:text-white' : ''
-              }`}
+            <Button
+              key={option.value}
+              variant={filters.industry === option.value ? "default" : "ghost"}
+              className={`w-full justify-start hover:bg-singlife-light transition-colors ${filters.industry === option.value ? 'bg-singlife-primary text-white hover:text-white' : ''
+                }`}
               onClick={() => {
                 setFilters({
                   ...filters,
@@ -358,12 +357,11 @@ export default function InvestmentsPage() {
         </h3>
         <div className="space-y-2">
           {filterCounts.stage.map((option) => (
-            <Button 
-              key={option.value} 
-              variant={filters.stage === option.value ? "default" : "ghost"} 
-              className={`w-full justify-start hover:bg-singlife-light transition-colors ${
-                filters.stage === option.value ? 'bg-singlife-primary text-white hover:text-white' : ''
-              }`}
+            <Button
+              key={option.value}
+              variant={filters.stage === option.value ? "default" : "ghost"}
+              className={`w-full justify-start hover:bg-singlife-light transition-colors ${filters.stage === option.value ? 'bg-singlife-primary text-white hover:text-white' : ''
+                }`}
               onClick={() => {
                 setFilters({
                   ...filters,
@@ -399,8 +397,8 @@ export default function InvestmentsPage() {
         <div className="flex gap-4">
           <div className="relative flex-1 md:w-96">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input 
-              placeholder="Search startups, products, or founders..." 
+            <Input
+              placeholder="Search startups, products, or founders..."
               className="pl-10 pr-4 w-full"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -461,7 +459,7 @@ export default function InvestmentsPage() {
           </DropdownMenu>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {/* Filter Section - Desktop */}
         <div className="hidden md:block md:col-span-1 space-y-6">
@@ -490,9 +488,8 @@ export default function InvestmentsPage() {
             <Button
               variant={activeTab === "featured" ? "default" : "outline"}
               onClick={() => setActiveTab("featured")}
-              className={`flex items-center gap-2 whitespace-nowrap ${
-                activeTab === "featured" ? 'bg-singlife-primary text-white hover:bg-singlife-primary/90' : ''
-              }`}
+              className={`flex items-center gap-2 whitespace-nowrap ${activeTab === "featured" ? 'bg-singlife-primary text-white hover:bg-singlife-primary/90' : ''
+                }`}
             >
               <Star className="h-4 w-4" />
               Featured
@@ -500,9 +497,8 @@ export default function InvestmentsPage() {
             <Button
               variant={activeTab === "trending" ? "default" : "outline"}
               onClick={() => setActiveTab("trending")}
-              className={`flex items-center gap-2 whitespace-nowrap ${
-                activeTab === "trending" ? 'bg-singlife-primary text-white hover:bg-singlife-primary/90' : ''
-              }`}
+              className={`flex items-center gap-2 whitespace-nowrap ${activeTab === "trending" ? 'bg-singlife-primary text-white hover:bg-singlife-primary/90' : ''
+                }`}
             >
               <TrendingUp className="h-4 w-4" />
               Trending
@@ -510,9 +506,8 @@ export default function InvestmentsPage() {
             <Button
               variant={activeTab === "early" ? "default" : "outline"}
               onClick={() => setActiveTab("early")}
-              className={`flex items-center gap-2 whitespace-nowrap ${
-                activeTab === "early" ? 'bg-singlife-primary text-white hover:bg-singlife-primary/90' : ''
-              }`}
+              className={`flex items-center gap-2 whitespace-nowrap ${activeTab === "early" ? 'bg-singlife-primary text-white hover:bg-singlife-primary/90' : ''
+                }`}
             >
               <Clock className="h-4 w-4" />
               Early Stage

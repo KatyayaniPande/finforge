@@ -46,7 +46,7 @@ export default function StartupsPage() {
         const response = await fetch('/api/startups?query=all');
         const result = await response.json();
         console.log('API Response:', result);
-        
+
         if (result.success) {
           setStartups(result.data.startups || []);
           setIndustryCounts(result.data.industryCounts || []);

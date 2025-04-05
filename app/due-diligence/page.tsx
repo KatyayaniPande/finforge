@@ -73,7 +73,7 @@ export default function DueDiligencePage() {
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <h1 className="text-3xl font-bold mb-6">Due Diligence Analysis</h1>
-      
+
       <Card className="mb-6 shadow-lg">
         <CardHeader>
           <CardTitle>Document Analysis</CardTitle>
@@ -86,15 +86,15 @@ export default function DueDiligencePage() {
             <div className="grid w-full items-center gap-4">
               <div>
                 <Label htmlFor="document" className="text-base font-semibold">Upload PDF Document</Label>
-                <Input 
-                  id="document" 
-                  type="file" 
+                <Input
+                  id="document"
+                  type="file"
                   accept=".pdf"
                   onChange={handleFileChange}
                   className="mt-2 cursor-pointer bg-white"
                 />
               </div>
-              
+
               {file && (
                 <div className="space-y-4">
                   <p className="text-sm text-muted-foreground">
@@ -105,7 +105,7 @@ export default function DueDiligencePage() {
                       Please select a PDF document
                     </p>
                   )}
-                  <Button 
+                  <Button
                     onClick={analyzeDocument}
                     disabled={analyzing || !file.name.toLowerCase().endsWith('.pdf')}
                     className="w-full bg-[#FF4405] hover:bg-[#FF4405]/90 text-white py-6 text-lg font-semibold shadow-md"
@@ -159,9 +159,9 @@ export default function DueDiligencePage() {
               {/* Main Analysis Message */}
               {result.data?.messages?.[0]?.content && (
                 <div className="border rounded-lg p-6 bg-white shadow">
-                  <div 
+                  <div
                     className="text-base space-y-4 text-gray-700"
-                    dangerouslySetInnerHTML={{ 
+                    dangerouslySetInnerHTML={{
                       __html: result.data.messages[0].content
                         .replace(/\*\*/g, '')
                         .replace(/(\d+\. )(.*?):/g, '<br/><strong class="text-gray-900">$2:</strong>')
@@ -174,7 +174,7 @@ export default function DueDiligencePage() {
 
               {/* View Raw JSON Button */}
               <div className="flex justify-end mt-6">
-                <Button 
+                <Button
                   onClick={handleSubmit}
                   className="bg-gray-800 hover:bg-gray-900 text-white py-5 px-6 text-base font-semibold shadow-md"
                 >
