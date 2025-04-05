@@ -20,7 +20,9 @@ import {
   DollarSign,
   Calendar,
   ChevronUp,
-  ChevronDown
+  ChevronDown,
+  Brain,
+  PieChart
 } from "lucide-react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
@@ -81,7 +83,13 @@ const startups = {
         marketSize: "$15B",
         retention: "92%",
         churnRate: "0.8%",
-        competitors: 8
+        competitors: 8,
+        productStage: "Revenue-generating",
+        maus: "12,000",
+        mrr: "$25K",
+        momGrowth: "+18%",
+        arpu: "$12/user/month",
+        grossMargin: "65%"
       },
       businessMetrics: {
         revenue: {
@@ -105,6 +113,14 @@ const startups = {
           tam: 15000000000,
           penetration: 0.8,
           trend: "up"
+        },
+        product: {
+          stage: "Revenue-generating",
+          maus: 12000,
+          mrr: 25000,
+          momGrowth: 18,
+          arpu: 12,
+          grossMargin: 65
         }
       },
       simulationParams: {
@@ -287,208 +303,216 @@ export default function StartupDetailsPage() {
                   <Badge variant="outline" className="bg-blue-50">AI Analysis</Badge>
                 </div>
 
-                {/* AI Analysis Content */}
-                <div className="grid grid-cols-2 gap-6 mt-6">
-                  <div>
-                    <h4 className="font-medium mb-3">Key Investment Points</h4>
-                    <ul className="space-y-2">
-                      {startup.aiAnalysis.keyPoints.map((point, index) => (
-                        <li key={index} className="flex items-center gap-2 text-gray-600">
-                          <div className="h-2 w-2 rounded-full bg-singlife-primary" />
-                          {point}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-medium mb-3">Opportunities</h4>
-                    <ul className="space-y-2">
-                      {startup.aiAnalysis.opportunities.map((opportunity, index) => (
-                        <li key={index} className="flex items-center gap-2 text-gray-600">
-                          <ChevronUp className="h-4 w-4 text-green-500" />
-                          {opportunity}
-                        </li>
-                      ))}
-                    </ul>
-                    <h4 className="font-medium mb-3 mt-6">Risks to Consider</h4>
-                    <ul className="space-y-2">
-                      {startup.aiAnalysis.risks.map((risk, index) => (
-                        <li key={index} className="flex items-center gap-2 text-gray-600">
-                          <ChevronDown className="h-4 w-4 text-red-500" />
-                          {risk}
-                        </li>
-                      ))}
-                    </ul>
+                {/* Risk Analysis Content */}
+                <div className="space-y-8">
+                  {/* AI Analysis Summary */}
+                  <Card className="p-8">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="p-2 bg-blue-50 rounded-lg">
+                        <Brain className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold">AI Investment Analysis</h3>
+                        <p className="text-sm text-gray-500">AI-powered risk assessment and recommendations</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-8">
+                      <div className="space-y-6">
+                        <div>
+                          <h4 className="font-medium mb-3">Key Investment Points</h4>
+                          <ul className="space-y-2">
+                            {startup.aiAnalysis.keyPoints.map((point, index) => (
+                              <li key={index} className="flex items-center gap-2 text-gray-600">
+                                <div className="h-2 w-2 rounded-full bg-singlife-primary" />
+                                {point}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <h4 className="font-medium mb-3">Opportunities</h4>
+                          <ul className="space-y-2">
+                            {startup.aiAnalysis.opportunities.map((opportunity, index) => (
+                              <li key={index} className="flex items-center gap-2 text-gray-600">
+                                <ChevronUp className="h-4 w-4 text-green-500" />
+                                {opportunity}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                      <div className="space-y-6">
+                        <div>
+                          <h4 className="font-medium mb-3">Risks to Consider</h4>
+                          <ul className="space-y-2">
+                            {startup.aiAnalysis.risks.map((risk, index) => (
+                              <li key={index} className="flex items-center gap-2 text-gray-600">
+                                <ChevronDown className="h-4 w-4 text-red-500" />
+                                {risk}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <h4 className="font-medium mb-3">Recommendation</h4>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={startup.aiAnalysis.recommendation === "High-Risk Investment" ? "destructive" : "default"}>
+                              {startup.aiAnalysis.recommendation}
+                            </Badge>
+                            <span className="text-sm text-gray-500">Confidence: {startup.aiAnalysis.confidence}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+
+                  {/* Investment Analysis */}
+                  <div className="grid grid-cols-3 gap-8">
+                    {/* Market Analysis */}
+                    <Card className="p-8">
+                      <div className="space-y-6">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-blue-50 rounded-lg">
+                            <Globe className="h-5 w-5 text-blue-600" />
+                          </div>
+                          <h3 className="text-lg font-semibold">Market Analysis</h3>
+                        </div>
+
+                        <div className="space-y-6">
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-600">Total Addressable Market</span>
+                              <span className="font-semibold">{startup.keyMetrics.marketSize}</span>
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              Current penetration: {startup.businessMetrics.market.penetration}%
+                            </div>
+                          </div>
+
+                          <div className="space-y-2 pt-4 border-t">
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-600">Market Growth Rate</span>
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold">+25%</span>
+                                <Badge variant="outline" className="bg-green-50 text-green-700 text-xs">
+                                  High Growth
+                                </Badge>
+                              </div>
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              Annual market growth rate
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+
+                    {/* Product & Traction */}
+                    <Card className="p-8">
+                      <div className="space-y-6">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-purple-50 rounded-lg">
+                            <TrendingUp className="h-5 w-5 text-purple-600" />
+                          </div>
+                          <h3 className="text-lg font-semibold">Product & Traction</h3>
+                        </div>
+
+                        <div className="space-y-6">
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-600">Product Stage</span>
+                              <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                                {startup.keyMetrics.productStage}
+                              </Badge>
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              Current development phase
+                            </div>
+                          </div>
+
+                          <div className="space-y-2 pt-4 border-t">
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-600">User Growth</span>
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold">{startup.keyMetrics.maus}</span>
+                                <Badge variant="outline" className={cn(
+                                  "text-xs",
+                                  startup.businessMetrics.product.momGrowth > 0 ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"
+                                )}>
+                                  {startup.keyMetrics.momGrowth}
+                                </Badge>
+                              </div>
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              Monthly active users
+                            </div>
+                          </div>
+
+                          <div className="space-y-2 pt-4 border-t">
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-600">Revenue Growth</span>
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold">{startup.keyMetrics.mrr}</span>
+                                <Badge variant="outline" className="bg-green-50 text-green-700 text-xs">
+                                  {startup.keyMetrics.revenueGrowth}
+                                </Badge>
+                              </div>
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              Monthly recurring revenue
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+
+                    {/* Exit Potential */}
+                    <Card className="p-8">
+                      <div className="space-y-6">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-green-50 rounded-lg">
+                            <DollarSign className="h-5 w-5 text-green-600" />
+                          </div>
+                          <h3 className="text-lg font-semibold">Exit Potential</h3>
+                        </div>
+
+                        <div className="space-y-6">
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-600">Current Valuation</span>
+                              <span className="font-semibold">${startup.valuation}</span>
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              Based on latest funding round
+                            </div>
+                          </div>
+
+                          <div className="space-y-2 pt-4 border-t">
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-600">Projected Exit Value</span>
+                              <span className="font-semibold">$50M - $100M</span>
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              Based on market comps
+                            </div>
+                          </div>
+
+                          <div className="space-y-2 pt-4 border-t">
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-600">Exit Timeline</span>
+                              <span className="font-semibold">3-5 years</span>
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              Estimated time to exit
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
                   </div>
                 </div>
               </Card>
-
-              {/* Portfolio Overview */}
-              <Card className="p-6 mb-6">
-                <h2 className="text-xl font-semibold mb-4">Portfolio Overview</h2>
-                <div className="grid grid-cols-4 gap-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Portfolio Value</div>
-                    <div className="text-xl font-bold">${startup.portfolioValue}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Risk Score</div>
-                    <div className="text-xl font-bold">{startup.riskScore}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Monthly Return</div>
-                    <div className="text-xl font-bold text-green-500">{startup.monthlyReturn}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Avg. Hold Period</div>
-                    <div className="text-xl font-bold">{startup.avgHoldPeriod}</div>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Risk Metrics */}
-              <div className="grid grid-cols-2 gap-6 mb-6">
-                <Card className="p-6">
-                  <h3 className="text-lg font-semibold mb-4">Risk Metrics</h3>
-                  <div className="space-y-4">
-                    {Object.entries(startup.riskMetrics).map(([key, value]) => (
-                      <div key={key} className="flex justify-between items-center">
-                        <span className="text-gray-600">
-                          {key.replace(/([A-Z])/g, ' $1').split(' ').map(word => 
-                            word.charAt(0).toUpperCase() + word.slice(1)
-                          ).join(' ')}
-                        </span>
-                        <span className="font-semibold">{value}</span>
-                      </div>
-                    ))}
-                  </div>
-                </Card>
-
-                <Card className="p-6">
-                  <h3 className="text-lg font-semibold mb-4">Key Metrics</h3>
-                  <div className="space-y-4">
-                    {Object.entries(startup.keyMetrics).map(([key, value]) => (
-                      <div key={key} className="flex justify-between items-center">
-                        <span className="text-gray-600">
-                          {key.replace(/([A-Z])/g, ' $1').split(' ').map(word => 
-                            word.charAt(0).toUpperCase() + word.slice(1)
-                          ).join(' ')}
-                        </span>
-                        <span className="font-semibold">{value}</span>
-                      </div>
-                    ))}
-                  </div>
-                </Card>
-              </div>
-
-              {/* Business Metrics */}
-              <div className="grid grid-cols-3 gap-6 mb-6">
-                {/* Revenue Metrics */}
-                <Card className="p-6">
-                  <h3 className="text-lg font-semibold mb-4">Revenue Metrics</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-gray-600">Monthly Revenue</span>
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold">${startup.keyMetrics.monthlyRevenue}</span>
-                          <Badge variant="outline" className={cn(
-                            "text-xs",
-                            startup.businessMetrics.revenue.trend === "up" ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"
-                          )}>
-                            {startup.keyMetrics.revenueGrowth}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="h-1 bg-gray-100 rounded">
-                        <div 
-                          className="h-1 bg-green-500 rounded" 
-                          style={{ width: `${Math.min(startup.businessMetrics.revenue.growth, 100)}%` }}
-                        />
-                      </div>
-                    </div>
-                    <div className="pt-4 border-t">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-gray-600">LTV/CAC Ratio</span>
-                        <span className="font-semibold">{startup.keyMetrics.ltvCacRatio}</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div className="bg-gray-50 p-2 rounded">
-                          <div className="text-gray-500">LTV</div>
-                          <div className="font-medium">${(startup.businessMetrics.ltv.value / 1000).toFixed(1)}k</div>
-                        </div>
-                        <div className="bg-gray-50 p-2 rounded">
-                          <div className="text-gray-500">CAC</div>
-                          <div className="font-medium">${(startup.businessMetrics.cac.value / 1000).toFixed(1)}k</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-
-                {/* Customer Metrics */}
-                <Card className="p-6">
-                  <h3 className="text-lg font-semibold mb-4">Customer Metrics</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-gray-600">Monthly Retention</span>
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold">{startup.keyMetrics.retention}</span>
-                          <Badge variant="outline" className="bg-green-50 text-green-700 text-xs">
-                            Strong
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="h-1 bg-gray-100 rounded">
-                        <div 
-                          className="h-1 bg-green-500 rounded" 
-                          style={{ width: `${startup.businessMetrics.retention.monthly}%` }}
-                        />
-                      </div>
-                    </div>
-                    <div className="pt-4 border-t">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-gray-600">Monthly Churn</span>
-                        <span className="font-semibold">{startup.keyMetrics.churnRate}</span>
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        Industry average: 3.2%
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-
-                {/* Market Metrics */}
-                <Card className="p-6">
-                  <h3 className="text-lg font-semibold mb-4">Market Metrics</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-gray-600">Total Market Size</span>
-                        <span className="font-semibold">{startup.keyMetrics.marketSize}</span>
-                      </div>
-                      <div className="text-sm text-gray-500 mb-4">
-                        Current market penetration: {startup.businessMetrics.market.penetration}%
-                      </div>
-                    </div>
-                    <div className="pt-4 border-t">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-gray-600">Runway</span>
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold">{startup.keyMetrics.runway}</span>
-                          <Badge variant={startup.keyMetrics.runway.includes("18") ? "outline" : "destructive"} className="text-xs">
-                            {parseInt(startup.keyMetrics.runway) <= 12 ? "Critical" : "Healthy"}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        Burn rate: {startup.keyMetrics.burnRate}
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              </div>
             </TabsContent>
           </Tabs>
         </div>
