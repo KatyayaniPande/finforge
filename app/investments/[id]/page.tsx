@@ -22,7 +22,8 @@ import {
   ChevronUp,
   ChevronDown,
   Brain,
-  PieChart
+  PieChart,
+  CheckCircle
 } from "lucide-react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
@@ -168,10 +169,43 @@ const startups = {
 
 type SimulationParamKey = 'marketGrowthRate' | 'competitorImpact' | 'monthlyBurnRate' | 'initialInvestment'
 
+interface AnalysisData {
+  marketAnalysis: {
+    marketSizeAssessment: string;
+    growthPotential: string;
+    competitivePosition: string;
+  };
+  financialMetrics: {
+    revenueProjection: string;
+    valuationAssessment: string;
+    returnPotential: string;
+  };
+  riskAnalysis: {
+    marketRisks: string[];
+    operationalRisks: string[];
+    financialRisks: string[];
+  };
+  investmentRecommendation: {
+    riskLevel: string;
+    expectedReturn: string;
+    timeHorizon: string;
+    keyConsiderations: string[];
+  };
+  keyMetrics: {
+    irr: number;
+    multiple: number;
+    paybackPeriod: number;
+    riskAdjustedReturn: number;
+  };
+}
+
 export default function StartupDetailsPage() {
   const params = useParams()
   const startupId = parseInt(params.id as string)
   const [activeTab, setActiveTab] = useState("overview")
+  const [data, setData] = useState<AnalysisData | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   // Find the startup by ID
   const startup = startups.featured.find(s => s.id === startupId)
@@ -181,6 +215,64 @@ export default function StartupDetailsPage() {
   const progress = (startup.fundingCurrent / startup.fundingTarget) * 100
   const formattedCurrent = (startup.fundingCurrent / 1000000).toFixed(1)
   const formattedTarget = (startup.fundingTarget / 1000000).toFixed(1)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!startup) return;
+      
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // Prepare the analysis data
+        const analysisData = {
+          startupMetrics: {
+            tam: startup.businessMetrics.market.tam,
+            marketGrowthRate: startup.simulationParams.marketGrowthRate.current,
+            productStage: startup.keyMetrics.productStage,
+            userGrowth: {
+              currentUsers: parseInt(startup.keyMetrics.maus.replace(/,/g, '')),
+              monthlyGrowthRate: startup.businessMetrics.product.momGrowth,
+              retentionRate: parseFloat(startup.keyMetrics.retention)
+            },
+            revenueGrowth: {
+              currentRevenue: startup.businessMetrics.revenue.current,
+              monthlyGrowthRate: startup.businessMetrics.revenue.growth,
+              grossMargin: startup.businessMetrics.product.grossMargin
+            },
+            currentValuation: parseFloat(startup.valuation.replace('M', '')) * 1000000,
+            projectedExitValue: 75000000,
+            exitTimeline: 48
+          }
+        };
+
+        console.log('Sending analysis data:', analysisData);
+
+        const response = await fetch('/api/analyze-startup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(analysisData)
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const responseData = await response.json();
+        console.log('Received response:', responseData);
+        setData(responseData);
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [startup]);
 
   return (
     <div className="p-6">
@@ -317,200 +409,131 @@ export default function StartupDetailsPage() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-8">
-                      <div className="space-y-6">
-                        <div>
-                          <h4 className="font-medium mb-3">Key Investment Points</h4>
-                          <ul className="space-y-2">
-                            {startup.aiAnalysis.keyPoints.map((point, index) => (
-                              <li key={index} className="flex items-center gap-2 text-gray-600">
-                                <div className="h-2 w-2 rounded-full bg-singlife-primary" />
-                                {point}
-                              </li>
-                            ))}
-                          </ul>
+                    {isLoading ? (
+                      <div className="text-center py-8">Loading analysis...</div>
+                    ) : error ? (
+                      <div className="text-center text-red-500 py-8">{error}</div>
+                    ) : data ? (
+                      <div className="grid grid-cols-2 gap-8">
+                        <div className="space-y-6">
+                          <div>
+                            <h4 className="font-medium mb-3">Market Analysis</h4>
+                            <div className="space-y-4">
+                              <p className="text-gray-600">{data.marketAnalysis.marketSizeAssessment}</p>
+                              <p className="text-gray-600">{data.marketAnalysis.growthPotential}</p>
+                              <p className="text-gray-600">{data.marketAnalysis.competitivePosition}</p>
+                            </div>
+                          </div>
+                          <div>
+                            <h4 className="font-medium mb-3">Financial Metrics</h4>
+                            <div className="space-y-4">
+                              <p className="text-gray-600">{data.financialMetrics.revenueProjection}</p>
+                              <p className="text-gray-600">{data.financialMetrics.valuationAssessment}</p>
+                              <p className="text-gray-600">{data.financialMetrics.returnPotential}</p>
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="font-medium mb-3">Opportunities</h4>
-                          <ul className="space-y-2">
-                            {startup.aiAnalysis.opportunities.map((opportunity, index) => (
-                              <li key={index} className="flex items-center gap-2 text-gray-600">
-                                <ChevronUp className="h-4 w-4 text-green-500" />
-                                {opportunity}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                      <div className="space-y-6">
-                        <div>
-                          <h4 className="font-medium mb-3">Risks to Consider</h4>
-                          <ul className="space-y-2">
-                            {startup.aiAnalysis.risks.map((risk, index) => (
-                              <li key={index} className="flex items-center gap-2 text-gray-600">
-                                <ChevronDown className="h-4 w-4 text-red-500" />
-                                {risk}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div>
-                          <h4 className="font-medium mb-3">Recommendation</h4>
-                          <div className="flex items-center gap-2">
-                            <Badge variant={startup.aiAnalysis.recommendation === "High-Risk Investment" ? "destructive" : "default"}>
-                              {startup.aiAnalysis.recommendation}
-                            </Badge>
-                            <span className="text-sm text-gray-500">Confidence: {startup.aiAnalysis.confidence}</span>
+                        <div className="space-y-6">
+                          <div>
+                            <h4 className="font-medium mb-3">Risk Analysis</h4>
+                            <div className="space-y-4">
+                              <div>
+                                <h5 className="text-sm font-medium mb-2">Market Risks</h5>
+                                <ul className="space-y-2">
+                                  {data.riskAnalysis.marketRisks.map((risk, index) => (
+                                    <li key={index} className="flex items-center gap-2 text-gray-600">
+                                      <ChevronDown className="h-4 w-4 text-red-500" />
+                                      {risk}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                              <div>
+                                <h5 className="text-sm font-medium mb-2">Operational Risks</h5>
+                                <ul className="space-y-2">
+                                  {data.riskAnalysis.operationalRisks.map((risk, index) => (
+                                    <li key={index} className="flex items-center gap-2 text-gray-600">
+                                      <ChevronDown className="h-4 w-4 text-red-500" />
+                                      {risk}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                              <div>
+                                <h5 className="text-sm font-medium mb-2">Financial Risks</h5>
+                                <ul className="space-y-2">
+                                  {data.riskAnalysis.financialRisks.map((risk, index) => (
+                                    <li key={index} className="flex items-center gap-2 text-gray-600">
+                                      <ChevronDown className="h-4 w-4 text-red-500" />
+                                      {risk}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+                          <div>
+                            <h4 className="font-medium mb-3">Investment Recommendation</h4>
+                            <div className="space-y-4">
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className={
+                                  data.investmentRecommendation.riskLevel === "medium" 
+                                    ? "bg-yellow-50 text-yellow-700"
+                                    : "bg-red-50 text-red-700"
+                                }>
+                                  {data.investmentRecommendation.riskLevel}
+                                </Badge>
+                                <span className="text-sm text-gray-500">Risk Level</span>
+                              </div>
+                              <p className="text-gray-600">{data.investmentRecommendation.expectedReturn}</p>
+                              <p className="text-gray-600">{data.investmentRecommendation.timeHorizon}</p>
+                              <div>
+                                <h5 className="text-sm font-medium mb-2">Key Considerations</h5>
+                                <ul className="space-y-2">
+                                  {data.investmentRecommendation.keyConsiderations.map((consideration, index) => (
+                                    <li key={index} className="flex items-center gap-2 text-gray-600">
+                                      <CheckCircle className="h-4 w-4 text-green-500" />
+                                      {consideration}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
+                    ) : null}
                   </Card>
 
-                  {/* Investment Analysis */}
-                  <div className="grid grid-cols-3 gap-8">
-                    {/* Market Analysis */}
-                    <Card className="p-8">
-                      <div className="space-y-6">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-blue-50 rounded-lg">
-                            <Globe className="h-5 w-5 text-blue-600" />
-                          </div>
-                          <h3 className="text-lg font-semibold">Market Analysis</h3>
+                  {/* Key Metrics */}
+                  {data && (
+                    <div className="grid grid-cols-4 gap-4">
+                      <Card className="p-4 bg-gray-50">
+                        <h4 className="text-sm text-gray-500 mb-1">IRR</h4>
+                        <div className="text-xl font-bold text-green-500">
+                          {data.keyMetrics.irr.toFixed(2)}%
                         </div>
-
-                        <div className="space-y-6">
-                          <div className="space-y-2">
-                            <div className="flex justify-between items-center">
-                              <span className="text-gray-600">Total Addressable Market</span>
-                              <span className="font-semibold">{startup.keyMetrics.marketSize}</span>
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              Current penetration: {startup.businessMetrics.market.penetration}%
-                            </div>
-                          </div>
-
-                          <div className="space-y-2 pt-4 border-t">
-                            <div className="flex justify-between items-center">
-                              <span className="text-gray-600">Market Growth Rate</span>
-                              <div className="flex items-center gap-2">
-                                <span className="font-semibold">+25%</span>
-                                <Badge variant="outline" className="bg-green-50 text-green-700 text-xs">
-                                  High Growth
-                                </Badge>
-                              </div>
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              Annual market growth rate
-                            </div>
-                          </div>
+                      </Card>
+                      <Card className="p-4 bg-gray-50">
+                        <h4 className="text-sm text-gray-500 mb-1">Multiple</h4>
+                        <div className="text-xl font-bold">
+                          {data.keyMetrics.multiple}x
                         </div>
-                      </div>
-                    </Card>
-
-                    {/* Product & Traction */}
-                    <Card className="p-8">
-                      <div className="space-y-6">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-purple-50 rounded-lg">
-                            <TrendingUp className="h-5 w-5 text-purple-600" />
-                          </div>
-                          <h3 className="text-lg font-semibold">Product & Traction</h3>
+                      </Card>
+                      <Card className="p-4 bg-gray-50">
+                        <h4 className="text-sm text-gray-500 mb-1">Payback Period</h4>
+                        <div className="text-xl font-bold">
+                          {data.keyMetrics.paybackPeriod} months
                         </div>
-
-                        <div className="space-y-6">
-                          <div className="space-y-2">
-                            <div className="flex justify-between items-center">
-                              <span className="text-gray-600">Product Stage</span>
-                              <Badge variant="outline" className="bg-blue-50 text-blue-700">
-                                {startup.keyMetrics.productStage}
-                              </Badge>
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              Current development phase
-                            </div>
-                          </div>
-
-                          <div className="space-y-2 pt-4 border-t">
-                            <div className="flex justify-between items-center">
-                              <span className="text-gray-600">User Growth</span>
-                              <div className="flex items-center gap-2">
-                                <span className="font-semibold">{startup.keyMetrics.maus}</span>
-                                <Badge variant="outline" className={cn(
-                                  "text-xs",
-                                  startup.businessMetrics.product.momGrowth > 0 ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"
-                                )}>
-                                  {startup.keyMetrics.momGrowth}
-                                </Badge>
-                              </div>
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              Monthly active users
-                            </div>
-                          </div>
-
-                          <div className="space-y-2 pt-4 border-t">
-                            <div className="flex justify-between items-center">
-                              <span className="text-gray-600">Revenue Growth</span>
-                              <div className="flex items-center gap-2">
-                                <span className="font-semibold">{startup.keyMetrics.mrr}</span>
-                                <Badge variant="outline" className="bg-green-50 text-green-700 text-xs">
-                                  {startup.keyMetrics.revenueGrowth}
-                                </Badge>
-                              </div>
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              Monthly recurring revenue
-                            </div>
-                          </div>
+                      </Card>
+                      <Card className="p-4 bg-gray-50">
+                        <h4 className="text-sm text-gray-500 mb-1">Risk-Adjusted Return</h4>
+                        <div className="text-xl font-bold text-blue-500">
+                          {data.keyMetrics.riskAdjustedReturn.toFixed(2)}%
                         </div>
-                      </div>
-                    </Card>
-
-                    {/* Exit Potential */}
-                    <Card className="p-8">
-                      <div className="space-y-6">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-green-50 rounded-lg">
-                            <DollarSign className="h-5 w-5 text-green-600" />
-                          </div>
-                          <h3 className="text-lg font-semibold">Exit Potential</h3>
-                        </div>
-
-                        <div className="space-y-6">
-                          <div className="space-y-2">
-                            <div className="flex justify-between items-center">
-                              <span className="text-gray-600">Current Valuation</span>
-                              <span className="font-semibold">${startup.valuation}</span>
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              Based on latest funding round
-                            </div>
-                          </div>
-
-                          <div className="space-y-2 pt-4 border-t">
-                            <div className="flex justify-between items-center">
-                              <span className="text-gray-600">Projected Exit Value</span>
-                              <span className="font-semibold">$50M - $100M</span>
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              Based on market comps
-                            </div>
-                          </div>
-
-                          <div className="space-y-2 pt-4 border-t">
-                            <div className="flex justify-between items-center">
-                              <span className="text-gray-600">Exit Timeline</span>
-                              <span className="font-semibold">3-5 years</span>
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              Estimated time to exit
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-                  </div>
+                      </Card>
+                    </div>
+                  )}
                 </div>
               </Card>
             </TabsContent>
