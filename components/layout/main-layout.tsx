@@ -3,6 +3,9 @@
 import { cn } from "@/lib/utils"
 import { Navbar } from "@/components/navbar"
 import { useSidebar } from "@/components/sidebar-context"
+import { useAuth } from "@/lib/auth-context"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 
 interface MainLayoutProps {
   children: React.ReactNode
@@ -10,6 +13,22 @@ interface MainLayoutProps {
 
 export function MainLayout({ children }: MainLayoutProps) {
   const { isCollapsed } = useSidebar()
+  const { user, isLoading } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push('/login')
+    }
+  }, [user, isLoading, router])
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+
+  if (!user) {
+    return null
+  }
 
   return (
     <div className="flex min-h-screen">

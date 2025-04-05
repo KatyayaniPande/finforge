@@ -14,8 +14,9 @@ import {
   ChevronRight,
   MessageSquare,
   Newspaper,
-  Rocket,
-  Building2
+  Building2,
+  TrendingUp,
+  User
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useSidebar } from './sidebar-context';
@@ -35,14 +36,22 @@ export function Navbar() {
     router.push('/login');
   };
 
-  const menuItems = [
-    { href: "/", icon: Home, label: "Dashboard" },
+  const investorMenuItems = [
+    { href: "/dashboard", icon: Home, label: "Dashboard" },
     { href: "/chat", icon: MessageSquare, label: "Chat" },
     { href: "/investments", icon: TrendingUp, label: "Investments" },
     { href: "/news", icon: Newspaper, label: "News" },
     { href: "/due-diligence", icon: FileText, label: "Due Diligence" },
     { href: "/about", icon: Info, label: "About" },
   ];
+
+  const startupMenuItems = [
+    { href: "/dashboard", icon: Home, label: "Dashboard" },
+    { href: "/startups/edit/profile", icon: User, label: "My Profile" },
+    { href: "/about", icon: Info, label: "About" },
+  ];
+
+  const menuItems = isInvestor ? investorMenuItems : startupMenuItems;
 
   return (
     <div 

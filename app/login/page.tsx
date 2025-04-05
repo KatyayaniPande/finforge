@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Building2, User } from 'lucide-react';
+import { toast } from 'sonner';
 
 // Mock users for demo
 const MOCK_USERS = {
@@ -29,43 +30,20 @@ export default function LoginPage() {
   const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>, role: 'investor' | 'startup') => {
-    event.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsLoading(true);
     setError('');
 
-    const formData = new FormData(event.currentTarget);
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-
     try {
-      // Check if user exists and credentials match
-      const user = MOCK_USERS[email as keyof typeof MOCK_USERS];
-      
-      if (!user) {
-        throw new Error('User not found');
-      }
-
-      if (user.password !== password) {
-        throw new Error('Invalid password');
-      }
-
-      if (user.role !== role) {
-        throw new Error('Invalid role for this user');
-      }
-
-      // Login successful
       await login(email, password);
-      
-      // Redirect based on role
-      if (role === 'investor') {
-        router.push('/startups');
-      } else {
-        router.push('/startups/edit/profile');
-      }
-    } catch (err) {
-      setError('Invalid credentials. Please try again.');
+      // Login function now handles the redirection
+    } catch (error) {
+      console.error('Login failed:', error);
+      toast.error('Login failed. Please check your credentials.');
     } finally {
       setIsLoading(false);
     }
@@ -75,9 +53,9 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Welcome to FinForge</CardTitle>
-          <CardDescription>
-            Sign in to access your account
+          <CardTitle className="text-2xl font-bold text-center">FinForge</CardTitle>
+          <CardDescription className="text-center">
+            Enter your credentials to access your account
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -94,7 +72,7 @@ export default function LoginPage() {
             </TabsList>
 
             <TabsContent value="investor">
-              <form onSubmit={(e) => handleSubmit(e, 'investor')} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="investor-email">Email</Label>
                   <Input
@@ -102,7 +80,8 @@ export default function LoginPage() {
                     name="email"
                     type="email"
                     placeholder="jondoe@finforge.com"
-                    defaultValue="jondoe@finforge.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     required
                   />
                 </div>
@@ -112,7 +91,9 @@ export default function LoginPage() {
                     id="investor-password"
                     name="password"
                     type="password"
-                    defaultValue="investor123"
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     required
                   />
                 </div>
@@ -128,7 +109,7 @@ export default function LoginPage() {
             </TabsContent>
 
             <TabsContent value="startup">
-              <form onSubmit={(e) => handleSubmit(e, 'startup')} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="startup-email">Email</Label>
                   <Input
@@ -136,7 +117,8 @@ export default function LoginPage() {
                     name="email"
                     type="email"
                     placeholder="neuralkey@startup.com"
-                    defaultValue="neuralkey@startup.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     required
                   />
                 </div>
@@ -146,7 +128,9 @@ export default function LoginPage() {
                     id="startup-password"
                     name="password"
                     type="password"
-                    defaultValue="startup123"
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     required
                   />
                 </div>
