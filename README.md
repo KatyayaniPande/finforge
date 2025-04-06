@@ -11,6 +11,9 @@
 ## Overview
 SingVentures is a smart, AI-powered investment platform that helps emerging and growth-stage investors discover, analyze, and manage startup investments with confidence and clarity. Our platform bridges the gap between promising startups and strategic investors through intelligent analytics and streamlined due diligence.
 
+> [!IMPORTANT]
+> Check out our [demo video](https://youtu.be/WwQipLh2vUY)!
+
 
 ## Features
 
